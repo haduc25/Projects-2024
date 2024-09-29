@@ -2,10 +2,10 @@ const mongoose = require('mongoose');
 
 // Định nghĩa Category Schema
 const CategorySchema = new mongoose.Schema({
-    name: Number,
-    cart: {
+    name: String,
+    restaurant: {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Cart',
+        ref: 'Restaurant',
     },
 });
 
