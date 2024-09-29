@@ -11,4 +11,7 @@ app.use('/', homeRouter);
 app.use(cors());
 app.use(bodyParser.json());
 
+const authRoutes = require('./routes/authRoutes.js');
+app.use('/auth', authRoutes);
+
 module.exports = { app };

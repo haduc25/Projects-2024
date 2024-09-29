@@ -13,7 +13,7 @@ module.exports = {
             const isUserExist = await User.findOne({ email: emailValue });
 
             if (isUserExist) {
-                throw new Error('Người dùng email ' + emailValue + ' này đã tồn tại');
+                throw new Error(`Người dùng email ${emailValue} này đã tồn tại`);
             }
 
             password = await bcrypt.hash(password, 8);
@@ -46,8 +46,30 @@ module.exports = {
             const user = await User.findById(userId).populate('addresses');
 
             if (!user) {
-                throw new Error('Người dùng không tồn tại');
+                throw new Error('Người dùng không tồn tại với id là - ', userId);
             }
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    },
+
+    // FIND USER PROFILE BY JWT
+    async findUserProfileByJwt(jwt) {
+        try {
+            const userId = getUserIdFromToken(jwt);
+            const user = await this.findUserById(userId);
+
+            return user;
+        } catch (error) {
+            throw new Error(error.message);
+        }
+    },
+
+    // FIND ALL USERS
+    async findAllUsers() {
+        try {
+            const users = await User.find();
+            return users;
         } catch (error) {
             throw new Error(error.message);
         }
