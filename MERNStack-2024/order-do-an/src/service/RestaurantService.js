@@ -79,7 +79,7 @@ module.exports = {
     },
 
     // GET RESTAURANT BY USER ID
-    async getRestaurantByUserId(userId) {
+    async getRestaurantsByUserId(userId) {
         try {
             const restaurant = await Restaurant.findOne({ owner: userId }).populate('owner').populate('address');
 
@@ -113,7 +113,7 @@ module.exports = {
     },
 
     // ADD TO FAVORITE
-    async addToFavorite(restaurantId, user) {
+    async addToFavorites(restaurantId, user) {
         try {
             const restaurant = await this.findRestaurantById(restaurantId);
 
