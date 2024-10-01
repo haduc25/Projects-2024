@@ -1,6 +1,6 @@
-const foodService = require('../service/foodService');
-const restaurantService = require('../service/restaurantService');
-const userService = require('../service/userService');
+const foodService = require('../services/foodService');
+const restaurantService = require('../services/restaurantService');
+const userService = require('../services/userService');
 
 module.exports = {
     // CUSTOMER

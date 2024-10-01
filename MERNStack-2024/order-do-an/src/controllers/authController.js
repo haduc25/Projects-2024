@@ -1,5 +1,5 @@
 const { generateToken } = require('../config/jwtProvider');
-const userService = require('../service/userService');
+const userService = require('../services/userService');
 const bcrypt = require('bcrypt');
 
 const register = async (req, res) => {
