@@ -1,4 +1,4 @@
-const restaurantService = require('../service/restaurantService');
+const restaurantService = require('../services/restaurantService');
 
 module.exports = {
     // CREATE RESTAURANT
