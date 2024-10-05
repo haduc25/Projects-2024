@@ -1,25 +1,34 @@
 import { useState } from 'react';
 import './Navbar.css';
 import { assets } from '../../assets/assets_vn';
+import { Link } from 'react-router-dom';
 
-const Navbar = () => {
+const Navbar = ({ setShowLogin }) => {
     const [menu, setMenu] = useState('home');
     return (
         <div className="navbar">
             <img src={assets.logo} alt="" className="logo" />
             <ul className="navbar-menu">
-                <li onClick={() => setMenu('home')} className={menu === 'home' ? 'active' : ''}>
+                <Link to="/" onClick={() => setMenu('home')} className={menu === 'home' ? 'active' : ''}>
                     Trang chủ
-                </li>
-                <li onClick={() => setMenu('menu')} className={menu === 'menu' ? 'active' : ''}>
+                </Link>
+                <a href="#explore-menu" onClick={() => setMenu('menu')} className={menu === 'menu' ? 'active' : ''}>
                     Thực đơn
-                </li>
-                <li onClick={() => setMenu('mobile-app')} className={menu === 'mobile-app' ? 'active' : ''}>
+                </a>
+                <a
+                    href="#app-download"
+                    onClick={() => setMenu('mobile-app')}
+                    className={menu === 'mobile-app' ? 'active' : ''}
+                >
                     Mobile-app
-                </li>
-                <li onClick={() => setMenu('contact-us')} className={menu === 'contact-us' ? 'active' : ''}>
+                </a>
+                <a
+                    href="#footer"
+                    onClick={() => setMenu('contact-us')}
+                    className={menu === 'contact-us' ? 'active' : ''}
+                >
                     Liên hệ với chúng tôi
-                </li>
+                </a>
             </ul>
             <div className="navbar-right">
                 <img src={assets.search_icon} alt="" className="search" />
@@ -27,7 +36,7 @@ const Navbar = () => {
                     <img src={assets.basket_icon} alt="" className="basket" />
                     <div className="dot"></div>
                 </div>
-                <button>Đăng nhập</button>
+                <button onClick={() => setShowLogin(true)}>Đăng nhập</button>
             </div>
             {/* <div className="navbar-left"></div> */}
         </div>

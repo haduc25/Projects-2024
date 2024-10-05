@@ -16,6 +16,7 @@
     margin: 0;
     box-sizing: border-box;
     font-family: 'Magnificent', sans-serif;
+    scroll-behavior: smooth;
 }
 body {
     min-height: 100vh;
