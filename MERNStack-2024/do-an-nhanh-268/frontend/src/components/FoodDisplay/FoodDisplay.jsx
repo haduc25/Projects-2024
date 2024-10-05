@@ -9,18 +9,20 @@ const FoodDisplay = ({ category }) => {
         <div className="food-display" id="food-display">
             <h2 onClick={() => console.log('food_list: ', food_list)}>Các món ăn hàng đầu</h2>
             <div className="food-display-list">
-                {food_list.map((item, index) => (
-                    <FoodItem
-                        key={index}
-                        id={item._id}
-                        name={item.name}
-                        price={item.price}
-                        description={item.description}
-                        image={item.image}
-                    />
-                ))}
+                {food_list.map(
+                    (item, index) =>
+                        (category === 'All' || category === item.category) && (
+                            <FoodItem
+                                key={index}
+                                id={item._id}
+                                name={item.name}
+                                price={item.price}
+                                description={item.description}
+                                image={item.image}
+                            />
+                        ),
+                )}
             </div>
-            <p>FoodDisplay</p>
         </div>
     );
 };
