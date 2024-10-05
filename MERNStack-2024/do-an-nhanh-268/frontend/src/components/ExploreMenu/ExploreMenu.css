@@ -39,8 +39,9 @@
 .explore-menu-list-item p {
     margin-top: 10px;
     color: #747474;
-    font-size: max(1.4vw, 16px);
+    font-size: max(1.2vw, 16px);
     cursor: pointer;
+    /* border: 1px solid #000; */
 }
 
 .explore-menu-list-item .active {
