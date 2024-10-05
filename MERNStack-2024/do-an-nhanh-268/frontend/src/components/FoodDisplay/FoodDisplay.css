@@ -1,0 +1,19 @@
+.food-display {
+    margin-top: 30px;
+}
+
+.food-display h2 {
+    font-size: max(2vw, 24px);
+    font-weight: 600;
+}
+
+.food-display-list {
+    display: grid;
+    grid-template-columns: repeat(
+        auto-fill,
+        minmax(240px, 1fr)
+    ); /* Tự động điền cột, với mỗi cột có chiều rộng tối thiểu 240px và tối đa 1fr (chia đều không gian còn lại) */
+    margin-top: 30px;
+    gap: 30px; /* Khoảng cách giữa các phần tử trong lưới, cả theo chiều ngang và dọc */
+    row-gap: 50px; /* Khoảng cách giữa các hàng trong lưới */
+}

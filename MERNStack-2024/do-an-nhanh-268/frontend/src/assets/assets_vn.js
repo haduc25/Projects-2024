@@ -88,7 +88,7 @@ export const menu_list = [
         menu_image: menu_1,
     },
     {
-        menu_name: 'Bánh cuốn',
+        menu_name: 'Bánh cuộn',
         menu_image: menu_2,
     },
     {
@@ -152,35 +152,35 @@ export const food_list = [
     },
     {
         _id: '5',
-        name: 'Cuốn Lasagna',
+        name: 'Lasagna cuộn',
         image: food_5,
         price: 14000,
         description: 'Thực phẩm cung cấp chất dinh dưỡng thiết yếu cho sức khỏe và hạnh phúc',
-        category: 'Bánh cuốn',
+        category: 'Bánh cuộn',
     },
     {
         _id: '6',
-        name: 'Cuốn Peri Peri',
+        name: 'Gà rán cuộn',
         image: food_6,
         price: 12000,
         description: 'Thực phẩm cung cấp chất dinh dưỡng thiết yếu cho sức khỏe và hạnh phúc',
-        category: 'Bánh cuốn',
+        category: 'Bánh cuộn',
     },
     {
         _id: '7',
-        name: 'Cuốn gà',
+        name: 'Rau cuộn',
         image: food_7,
         price: 20000,
         description: 'Thực phẩm cung cấp chất dinh dưỡng thiết yếu cho sức khỏe và hạnh phúc',
-        category: 'Bánh cuốn',
+        category: 'Bánh cuộn',
     },
     {
         _id: '8',
-        name: 'Cuốn rau',
+        name: 'Trứng cuộn',
         image: food_8,
         price: 15000,
         description: 'Thực phẩm cung cấp chất dinh dưỡng thiết yếu cho sức khỏe và hạnh phúc',
-        category: 'Bánh cuốn',
+        category: 'Bánh cuộn',
     },
     {
         _id: '9',
@@ -304,7 +304,7 @@ export const food_list = [
     },
     {
         _id: '24',
-        name: 'Cơm bí ngòi',
+        name: 'Cơm rang trứng', // lòng đào
         image: food_24,
         price: 12000,
         description: 'Thực phẩm cung cấp chất dinh dưỡng thiết yếu cho sức khỏe và hạnh phúc',
