@@ -1,6 +1,7 @@
 import { useContext } from 'react';
 import './Cart.css';
 import { StoreContext } from '../../context/StoreContext';
+import { useNavigate } from 'react-router-dom';
 
 const CHI_PHI_VAN_CHUYEN = 2000;
 
@@ -8,12 +9,19 @@ const Cart = () => {
     const { cartItems, food_list, removeFromCart, getTotalCartAmount, utilityFunctions } = useContext(StoreContext);
     const { formatCurrency } = utilityFunctions;
 
+    const navigate = useNavigate();
+
+    // Tính tổng
+    const TONG_TIEN_SAN_PHAM = getTotalCartAmount();
+    const CHI_PHI_VAN_CHUYEN_THUC_TE = TONG_TIEN_SAN_PHAM === 0 ? 0 : CHI_PHI_VAN_CHUYEN;
+    const TONG_TIEN = TONG_TIEN_SAN_PHAM + CHI_PHI_VAN_CHUYEN_THUC_TE;
+
     return (
         <div className="cart">
             <div className="cart-items">
                 <div className="cart-items-title">
                     <p>Mặt hàng</p>
-                    <p>Tiêu đề</p>
+                    <p>Tên sản phẩm</p>
                     <p>Giá</p>
                     <p>Số lượng</p>
                     <p>Tổng tiền</p>
@@ -29,7 +37,7 @@ const Cart = () => {
                                     <img src={item.image} alt={item.name} />
                                     <p>{item.name}</p>
                                     <p>{formatCurrency(item.price)}</p>
-                                    <p>{cartItems[item._id]}</p>
+                                    <p className="quantity">{cartItems[item._id]}</p>
                                     <p>{formatCurrency(item.price * cartItems[item._id])}</p>
                                     <p onClick={() => removeFromCart(item._id)} className="cross">
                                         x
@@ -46,20 +54,20 @@ const Cart = () => {
                     <div>
                         <div className="cart-total-details">
                             <p>Tổng cộng</p>
-                            <p>{formatCurrency(getTotalCartAmount())}</p>
+                            <p>{formatCurrency(TONG_TIEN_SAN_PHAM)}</p>
                         </div>
                         <hr />
                         <div className="cart-total-details">
                             <p>Phí vận chuyển</p>
-                            <p>{formatCurrency(CHI_PHI_VAN_CHUYEN)}</p>
+                            <p>{formatCurrency(CHI_PHI_VAN_CHUYEN_THUC_TE)}</p>
                         </div>
                         <hr />
                         <div className="cart-total-details">
                             <b>Tổng cộng</b>
-                            <b>{formatCurrency(getTotalCartAmount() + CHI_PHI_VAN_CHUYEN)}</b>
+                            <b>{formatCurrency(TONG_TIEN)}</b>
                         </div>
                     </div>
-                    <button>TIẾN HÀNH THANH TOÁN</button>
+                    <button onClick={() => navigate('/dat-hang')}>MUA HÀNG</button>
                 </div>
                 <div className="cart-promocode">
                     <div>

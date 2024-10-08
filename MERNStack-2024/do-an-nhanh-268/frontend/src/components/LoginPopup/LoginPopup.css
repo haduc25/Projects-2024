@@ -47,7 +47,8 @@
 .login-popup-title img {
     width: 16px;
     cursor: pointer;
-    padding-left: ;
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
 .login-popup-inputs {

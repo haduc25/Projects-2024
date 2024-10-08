@@ -24,12 +24,21 @@
     color: #000;
 }
 
+.cart-items-item .quantity {
+    padding-left: 14px;
+}
+
 .cart-items-item img {
     width: 80px;
+    border-radius: 8px;
 }
 
 .cart-items-item .cross {
     cursor: pointer;
+}
+
+.cart-items-item .cross:hover {
+    font-weight: bold;
 }
 
 .cart-bottom {
@@ -57,12 +66,15 @@
     padding: 12px 0;
     border-radius: 4px;
     cursor: pointer;
+    user-select: none;
+    -webkit-user-drag: none;
 }
 
 .cart-total-details {
     display: flex;
     justify-content: space-between;
     color: #555;
+    margin: 10px 0;
 }
 
 .cart-promocode {
