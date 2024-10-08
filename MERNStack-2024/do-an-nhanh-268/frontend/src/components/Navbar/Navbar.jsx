@@ -7,7 +7,10 @@ const Navbar = ({ setShowLogin }) => {
     const [menu, setMenu] = useState('home');
     return (
         <div className="navbar">
-            <img src={assets.logo} alt="" className="logo" />
+            <Link to="/">
+                <img src={assets.logo} alt="" className="logo" />
+            </Link>
+
             <ul className="navbar-menu">
                 <Link to="/" onClick={() => setMenu('home')} className={menu === 'home' ? 'active' : ''}>
                     Trang chủ
@@ -33,7 +36,9 @@ const Navbar = ({ setShowLogin }) => {
             <div className="navbar-right">
                 <img src={assets.search_icon} alt="" className="search" />
                 <div className="navbar-search-icon">
-                    <img src={assets.basket_icon} alt="" className="basket" />
+                    <Link to="/gio-hang">
+                        <img src={assets.basket_icon} alt="" className="basket" />
+                    </Link>
                     <div className="dot"></div>
                 </div>
                 <button onClick={() => setShowLogin(true)}>Đăng nhập</button>

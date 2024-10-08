@@ -42,11 +42,44 @@ const StoreContextProvider = (props) => {
         // }
     };
 
+    const getTotalCartAmount = () => {
+        let totalAmount = 0;
+
+        for (const item in cartItems) {
+            if (cartItems[item] > 0) {
+                // Tìm sản phẩm tương ứng trong danh sách food_list dựa trên _id | Để tăng hiệu suất tìm kiếm có thể thay `find()` bằng cách sử dụng `map()`
+                let itemInfo = food_list.find((product) => product._id === item);
+                // Tính tổng tiền
+                totalAmount += itemInfo.price * cartItems[item];
+            }
+        }
+        return totalAmount;
+    };
+
+    // Test
     useEffect(() => {
         console.log('cartItems: ', cartItems);
     }, [cartItems]);
 
-    const contextValue = { food_list, cartItems, setCartItems, addToCart, removeFromCart };
+    // Global Functions
+    const utilityFunctions = {
+        sum: (a, b) => a + b, // Hàm sum() đơn giản
+        getTotalItems: () => Object.values(cartItems).reduce((sum, qty) => sum + qty, 0), // Tổng số lượng sản phẩm trong giỏ hàng
+        calculateDiscount: (totalAmount, discountPercentage) => totalAmount * (1 - discountPercentage / 100), // Hàm tính giảm giá
+        getCartItems: () => cartItems, // Trả về giỏ hàng hiện tại
+        formatCurrency: (amount) =>
+            new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount),
+    };
+
+    const contextValue = {
+        food_list,
+        cartItems,
+        setCartItems,
+        addToCart,
+        removeFromCart,
+        getTotalCartAmount,
+        utilityFunctions,
+    };
     return <StoreContext.Provider value={contextValue}>{props.children}</StoreContext.Provider>;
 };
 
