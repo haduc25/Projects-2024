@@ -2,6 +2,7 @@ import express from 'express';
 import cors from 'cors';
 import { connectDB111 } from './config/database2.js';
 import foodRouter from './routes/foodRoute.js';
+import userRouter from './routes/userRoute.js';
 
 const app = express();
 const PORT = 5200;
@@ -13,8 +14,10 @@ app.use(cors());
 // db connection
 connectDB111();
 
-// api endpoint
+// api endpoints
 app.use('/api/food', foodRouter);
+app.use('/images', express.static('uploads'));
+app.use('/api/user', userRouter);
 
 app.get('/', (req, res) => {
     res.send('API WORKING');

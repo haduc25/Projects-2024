@@ -20,9 +20,32 @@ const addFood = async (req, res) => {
         await food.save();
         res.json({ success: true, message: 'Đã thêm món ăn' });
     } catch (error) {
-        console.log('error: ', error);
-        res.json({ success: false, message: 'Error' });
+        res.json({ success: false, message: `Lỗi: ${error.message}` });
     }
 };
 
-export { addFood };
+// all food list
+const listFood = async (req, res) => {
+    try {
+        const foods = await foodModel.find({});
+        res.json({ success: true, data: foods });
+    } catch (error) {
+        res.json({ success: false, message: `Lỗi: ${error.message}` });
+    }
+};
+
+// remove food item
+const removeFood = async (req, res) => {
+    try {
+        const food = await foodModel.findById(req.body.id);
+        // xoá ảnh trong `uploads`
+        fs.unlink(`uploads/${food.image}`, () => {});
+
+        await foodModel.findByIdAndDelete(req.body.id);
+        res.json({ success: true, message: 'Đã xóa món ăn' });
+    } catch (error) {
+        res.json({ success: false, message: `Lỗi: ${error.message}` });
+    }
+};
+
+export { addFood, listFood, removeFood };
