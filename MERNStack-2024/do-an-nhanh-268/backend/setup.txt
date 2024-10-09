@@ -1,0 +1,6 @@
+# khởi tạo dự án
+npm init
+- entry point: (index.js) server.js
+
+# install
+npm i express mongoose jsonwebtoken bcrypt cors dotenv body-parser multer stripe validator nodemon 
