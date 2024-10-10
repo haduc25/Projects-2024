@@ -3,6 +3,7 @@ import cors from 'cors';
 import { connectDB111 } from './config/database2.js';
 import foodRouter from './routes/foodRoute.js';
 import userRouter from './routes/userRoute.js';
+import 'dotenv/config';
 
 const app = express();
 const PORT = 5200;
