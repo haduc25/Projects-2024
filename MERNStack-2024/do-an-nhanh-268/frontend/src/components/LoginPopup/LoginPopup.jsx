@@ -1,26 +1,90 @@
-import { useState } from 'react';
+import { useContext, useEffect, useState } from 'react';
 import './LoginPopup.css';
 import { assets } from '../../assets/assets_vn';
+import { StoreContext } from '../../context/StoreContext';
+import axios from 'axios';
 
 const DANG_NHAP = 'Đăng nhập';
 const DANG_KY = 'Đăng ký';
 
 const LoginPopup = ({ setShowLogin }) => {
+    const { url, setToken } = useContext(StoreContext);
+
     const [currState, setCurrState] = useState(DANG_NHAP);
+    const [data, setData] = useState({
+        name: '',
+        email: '',
+        password: '',
+    });
+
+    const onChangeHandler = (event) => {
+        const name = event.target.name;
+        const value = event.target.value;
+
+        setData((data) => ({ ...data, [name]: value }));
+    };
+
+    const onLogin = async (event) => {
+        event.preventDefault();
+        let newUrl = url;
+        if (currState === DANG_NHAP) {
+            newUrl += 'api/user/login';
+        } else {
+            newUrl += 'api/user/register';
+        }
+
+        const response = await axios.post(newUrl, data);
+
+        if (response.data.success) {
+            setToken(response.data.token);
+            localStorage.setItem('token', response.data.token);
+            setShowLogin(false);
+        } else {
+            console.log('response.data.message: ', response.data.message);
+            alert('response.data.message: ', response.data.message);
+        }
+    };
+
+    useEffect(() => {
+        console.log('LoginPopup_data: ', data);
+    }, [data]);
 
     return (
         <div className="login-popup">
-            <form className="login-popup-container">
+            <form onSubmit={onLogin} className="login-popup-container">
                 <div className="login-popup-title">
                     <h2>{currState}</h2>
                     <img onClick={() => setShowLogin(false)} src={assets.cross_icon} alt="cross icon" />
                 </div>
                 <div className="login-popup-inputs">
-                    {currState === DANG_KY && <input type="text" placeholder="Nhập tên đăng nhập" required />}
-                    <input type="email" placeholder="Nhập email" required />
-                    <input type="password" placeholder="Nhập mật khẩu" required />
+                    {currState === DANG_KY && (
+                        <input
+                            name="name"
+                            type="text"
+                            onChange={onChangeHandler}
+                            value={data.name}
+                            placeholder="Nhập tên đăng nhập"
+                            required
+                        />
+                    )}
+                    <input
+                        name="email"
+                        onChange={onChangeHandler}
+                        value={data.email}
+                        type="email"
+                        placeholder="Nhập email"
+                        required
+                    />
+                    <input
+                        name="password"
+                        onChange={onChangeHandler}
+                        value={data.password}
+                        type="password"
+                        placeholder="Nhập mật khẩu"
+                        required
+                    />
                 </div>
-                <button>{currState === DANG_KY ? 'Tạo tài khoản' : DANG_NHAP}</button>
+                <button type="submit">{currState === DANG_KY ? 'Tạo tài khoản' : DANG_NHAP}</button>
                 <div className="login-popup-condition">
                     <input type="checkbox" required />
                     <p>Bằng việc tiếp tục, tôi đồng ý với Điều khoản sử dụng & Chính sách bảo mật.</p>

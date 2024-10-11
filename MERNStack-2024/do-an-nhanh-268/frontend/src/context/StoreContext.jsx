@@ -1,5 +1,6 @@
+import axios from 'axios';
 import { createContext, useEffect, useState } from 'react';
-import { food_list } from '../assets/assets_vn';
+// import { food_list } from '../assets/assets_vn';
 
 // Tạo Context: Context này sẽ giúp chia sẻ dữ liệu trong toàn bộ ứng dụng mà không cần phải truyền qua props từng cấp
 export const StoreContext = createContext(null);
@@ -11,6 +12,11 @@ export const StoreContext = createContext(null);
  */
 const StoreContextProvider = (props) => {
     const [cartItems, setCartItems] = useState({});
+    // backend url
+    const url = 'http://localhost:5200/';
+    // const [token, setToken] = useState('');
+    const [token, setToken] = useState('');
+    const [food_list, setFoodList] = useState([]);
 
     // ADD TO CART
     const addToCart = (itemId) => {
@@ -56,10 +62,26 @@ const StoreContextProvider = (props) => {
         return totalAmount;
     };
 
+    const fetchFoodList = async () => {
+        const response = await axios.get(url + 'api/food/list');
+        setFoodList(response.data.data);
+    };
+
     // Test
+    // useEffect(() => {
+    //     console.log('cartItems: ', cartItems);
+    // }, [cartItems]);
+
+    // get data from local storage
     useEffect(() => {
-        console.log('cartItems: ', cartItems);
-    }, [cartItems]);
+        async function loadData() {
+            await fetchFoodList();
+            if (localStorage.getItem('token')) {
+                setToken(localStorage.getItem('token'));
+            }
+        }
+        loadData();
+    }, []);
 
     // Global Functions
     const utilityFunctions = {
@@ -79,6 +101,9 @@ const StoreContextProvider = (props) => {
         removeFromCart,
         getTotalCartAmount,
         utilityFunctions,
+        url,
+        token,
+        setToken,
     };
     return <StoreContext.Provider value={contextValue}>{props.children}</StoreContext.Provider>;
 };

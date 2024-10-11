@@ -7,3 +7,6 @@ npm i express mongoose jsonwebtoken bcrypt cors dotenv body-parser multer stripe
 
 #admin `D:\Workspace - Development\Projects\MERN\MERNStack-2024\do-an-nhanh-268\admin>`
 npm i axios react-toastify react-router-dom
+
+#frontend
+npm i axios
