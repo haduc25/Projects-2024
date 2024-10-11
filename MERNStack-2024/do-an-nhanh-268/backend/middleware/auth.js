@@ -3,7 +3,7 @@ import jwt from 'jsonwebtoken';
 const authMiddleware = async (req, res, next) => {
     const { token } = req.headers;
     if (!token) {
-        return res.json({ success: false, message: 'Không được phép hãy đăng nhập lại' });
+        return res.json({ success: false, message: 'Không được phép truy cập, vui lòng đăng nhập' });
     }
 
     try {
