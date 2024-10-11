@@ -19,7 +19,7 @@ const StoreContextProvider = (props) => {
     const [food_list, setFoodList] = useState([]);
 
     // ADD TO CART
-    const addToCart = (itemId) => {
+    const addToCart = async (itemId) => {
         if (!cartItems[itemId]) {
             // Thêm món ăn vào giỏ hàng: tạo ra một đối tượng mới, sao chép tất cả các mục từ prev, và thêm mục mới cho itemId với giá trị là 1.
             setCartItems((prev) => ({ ...prev, [itemId]: 1 }));
@@ -27,10 +27,14 @@ const StoreContextProvider = (props) => {
             // Cập nhật số lượng món ăn nếu đã tồn tại: lấy số lượng hiện tại (prev[itemId]) và cộng thêm 1
             setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] + 1 }));
         }
+
+        if (token) {
+            await axios.post(url + 'api/cart/add', { itemId }, { headers: { token } });
+        }
     };
 
     // REMOVE FROM CART
-    const removeFromCart = (itemId) => {
+    const removeFromCart = async (itemId) => {
         // CASE 1
         setCartItems((prev) => ({ ...prev, [itemId]: prev[itemId] - 1 }));
 
@@ -46,6 +50,10 @@ const StoreContextProvider = (props) => {
         //         return newCartItems;
         //     });
         // }
+
+        if (token) {
+            await axios.post(url + 'api/cart/remove', { itemId }, { headers: { token } });
+        }
     };
 
     const getTotalCartAmount = () => {
@@ -67,6 +75,11 @@ const StoreContextProvider = (props) => {
         setFoodList(response.data.data);
     };
 
+    const loadCartData = async (token) => {
+        const response = await axios.post(url + 'api/cart/get', {}, { headers: { token } });
+        setCartItems(response.data.cartData);
+    };
+
     // Test
     // useEffect(() => {
     //     console.log('cartItems: ', cartItems);
@@ -78,6 +91,7 @@ const StoreContextProvider = (props) => {
             await fetchFoodList();
             if (localStorage.getItem('token')) {
                 setToken(localStorage.getItem('token'));
+                await loadCartData(localStorage.getItem('token'));
             }
         }
         loadData();
