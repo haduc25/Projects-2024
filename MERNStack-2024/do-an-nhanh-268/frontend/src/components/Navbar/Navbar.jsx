@@ -15,7 +15,7 @@ const Navbar = ({ setShowLogin }) => {
         navigate('/');
     };
 
-    console.log('token: ', token, localStorage.getItem('token'));
+    // console.log('token: ', token, localStorage.getItem('token'));
 
     return (
         <div className="navbar">

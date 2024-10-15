@@ -9,6 +9,7 @@ const placeOrder = async (req, res) => {
     const frontend_url = 'http://localhost:5173/';
 
     try {
+        // Lưu & Xóa dữ liệu giỏ hàng của người dùng
         const newOrder = new orderModel({
             userId: req.body.userId,
             items: req.body.items,
@@ -19,6 +20,7 @@ const placeOrder = async (req, res) => {
         await newOrder.save();
         await userModel.findByIdAndUpdate(req.body.userId, { cartData: {} });
 
+        // Chuẩn bị dữ liệu thanh toán cho Stripe
         const line_items = req.body.items.map((item) => ({
             price_data: {
                 currency: 'vnd', // Chuyển sang tiền Việt
@@ -54,4 +56,23 @@ const placeOrder = async (req, res) => {
     }
 };
 
-export { placeOrder };
+const verifyOrder = async (req, res) => {
+    console.log('123: ', req.body);
+
+    const { orderId, success } = req.body;
+    try {
+        if (success == 'true') {
+            await orderModel.findByIdAndUpdate(orderId, { payment: true });
+            console.log('true');
+            res.json({ success: 'true', message: 'Đã thanh toán' });
+        } else {
+            await orderModel.findByIdAndDelete(orderId);
+            console.log('false');
+            res.json({ success: 'false', message: 'Chưa thanh toán' });
+        }
+    } catch (error) {
+        res.json({ success: false, message: `Lỗi: ${error.message}` });
+    }
+};
+
+export { placeOrder, verifyOrder };

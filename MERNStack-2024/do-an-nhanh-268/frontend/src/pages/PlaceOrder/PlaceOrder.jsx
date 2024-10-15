@@ -27,9 +27,9 @@ const PlaceOrder = () => {
         setData((data) => ({ ...data, [name]: value }));
     };
 
-    useEffect(() => {
-        console.log('PlaceOrder_data: ', data);
-    }, [data]);
+    // useEffect(() => {
+    //     console.log('PlaceOrder_data: ', data);
+    // }, [data]);
 
     const placeOrder = async (event) => {
         event.preventDefault();
@@ -41,18 +41,19 @@ const PlaceOrder = () => {
                 orderItems.push(itemInfo);
             }
         });
-        console.log('PlaceOrder_orderItems: ', orderItems);
+        // console.log('PlaceOrder_orderItems: ', orderItems);
 
         let orderData = {
             address: data,
             items: orderItems,
             amount: getTotalCartAmount() + CHI_PHI_VAN_CHUYEN,
         };
-
+        console.log('PLACE ORDER: ', token);
         let response = await axios.post(url + 'api/order/place', orderData, { headers: { token } });
         if (response.data.success) {
             const { session_url } = response.data;
             console.log('PlaceOrder_session_url: ', session_url);
+            console.log('PlaceOrder_responsel: ', response);
             window.location.replace(session_url);
         } else {
             alert('ERROR');

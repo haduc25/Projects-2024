@@ -31,10 +31,10 @@ const Cart = () => {
                 <br />
                 <hr />
                 {food_list.map(
-                    (item, index) =>
+                    (item) =>
                         cartItems[item._id] > 0 && (
-                            <>
-                                <div key={index} className="cart-items-title cart-items-item">
+                            <div key={item._id}>
+                                <div className="cart-items-title cart-items-item">
                                     <img src={url + 'images/' + item.image} alt={item.name} />
                                     <p>{item.name}</p>
                                     <p>{formatCurrency(item.price)}</p>
@@ -45,7 +45,7 @@ const Cart = () => {
                                     </p>
                                 </div>
                                 <hr />
-                            </>
+                            </div>
                         ),
                 )}
             </div>
