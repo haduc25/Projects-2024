@@ -1,4 +1,5 @@
 import { useContext, useEffect, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { StoreContext } from '../../context/StoreContext';
 import './PlaceOrder.css';
 import axios from 'axios';
@@ -8,6 +9,7 @@ const CHI_PHI_VAN_CHUYEN = 2000;
 const PlaceOrder = () => {
     const { getTotalCartAmount, utilityFunctions, token, food_list, cartItems, url } = useContext(StoreContext);
     const { formatCurrency } = utilityFunctions;
+    const navigate = useNavigate();
 
     const [data, setData] = useState({
         firstName: '',
@@ -26,10 +28,6 @@ const PlaceOrder = () => {
         const value = event.target.value;
         setData((data) => ({ ...data, [name]: value }));
     };
-
-    // useEffect(() => {
-    //     console.log('PlaceOrder_data: ', data);
-    // }, [data]);
 
     const placeOrder = async (event) => {
         event.preventDefault();
@@ -59,6 +57,18 @@ const PlaceOrder = () => {
             alert('ERROR');
         }
     };
+
+    // useEffect(() => {
+    //     console.log('PlaceOrder_data: ', data);
+    // }, [data]);
+
+    useEffect(() => {
+        if (!token) {
+            navigate('/gio-hang');
+        } else if (getTotalCartAmount() === 0) {
+            navigate('/gio-hang');
+        }
+    }, [token]);
 
     return (
         <form onSubmit={placeOrder} className="place-order">
