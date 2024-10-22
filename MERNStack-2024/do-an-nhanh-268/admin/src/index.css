@@ -1,12 +1,11 @@
 @font-face {
-    font-family: 'SendFlowers';
-    src: url('../public/fonts/sendflowers-regular/SendFlowers-Regular.ttf') format('truetype');
+    font-family: 'SVN_Sofia';
+    src: url('../public/fonts/2/svn-sofia/SVN-Sofia.ttf') format('truetype');
     font-weight: normal;
     font-style: normal;
 }
 
 /* src: url('../public/fonts/DesignerVN-Poppins/DesignerVN-Poppins-Regular.ttf') format('truetype'); */
-/* src: url('../public/fonts/sendflowers-regular/SendFlowers-Regular.ttf') format('truetype'); */
 /* src: url('../public/fonts/2/svn-sofia/SVN-Sofia.ttf') format('truetype'); */
 /* src: url('../public/fonts/2/vn-sunshine-script/vn-sunshine-script.ttf') format('truetype'); */
 
@@ -14,7 +13,7 @@
     padding: 0;
     margin: 0;
     box-sizing: border-box;
-    font-family: 'SendFlowers', sans-serif;
+    font-family: 'SVN_Sofia', sans-serif;
     scroll-behavior: smooth;
 }
 body {
