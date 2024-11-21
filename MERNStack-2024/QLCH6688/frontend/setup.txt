@@ -1,0 +1,13 @@
+# khởi tạo dự án
+npm create vite@latest
+
+Chọn react => js
+
+cd to folder
+npm install
+
+
+npm i react-router-dom
+
+
+npm run dev
