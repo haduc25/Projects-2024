@@ -1,13 +1,16 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useContext } from 'react';
 import './Home.css';
 import { products } from '../../assets/products.js';
+import { StoreContext } from '../../context/StoreContext.jsx';
 
-const localhostImageBackEnd = 'http://localhost:6868/images/';
 const Home = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [suggestions, setSuggestions] = useState([]);
     const [error, setError] = useState('');
+
+    const { urlImage, cartItems, addToCart, removeFromCart, utilityFunctions } = useContext(StoreContext);
+    const { formatCurrency } = utilityFunctions;
 
     useEffect(() => {
         const handleKeyDown = (event) => {
@@ -25,10 +28,6 @@ const Home = () => {
 
     const handleSearchChange = (event) => {
         let value = event.target.value;
-
-        // Loại bỏ các ký tự đặc biệt để tránh SQL Injection hoặc tấn công script
-        value = value.replace(/[^\w\s]/gi, ''); // Chỉ giữ lại chữ cái, số và khoảng trắng
-
         setSearchTerm(value);
 
         if (value.trim()) {
@@ -72,7 +71,13 @@ const Home = () => {
 
         if (filteredProducts.length === 0) {
             setError(`Không tìm thấy sản phẩm nào phù hợp với từ khóa "${searchTerm}"`);
+            return;
         }
+
+        // console.log('filteredProducts: ', filteredProducts[0]._id);
+        addToCart(filteredProducts[0]._id);
+        console.log('cartItems: ', cartItems);
+        console.log('products: ', products);
         setSearchResults(filteredProducts);
 
         // Clear input fields
@@ -86,147 +91,174 @@ const Home = () => {
     };
 
     return (
-        <div>
-            <form onSubmit={handleSearch}>
-                <input
-                    id="search-input"
-                    type="text"
-                    placeholder="Tìm kiếm sản phẩm (Tên, Mã hàng, Mã vạch)"
-                    value={searchTerm}
-                    onChange={handleSearchChange}
-                    autoFocus
-                    autoComplete
-                />
-                <button type="submit">Tìm kiếm</button>
-            </form>
+        <div className="sale-container">
+            <div style={{ backgroundColor: 'yellow' }}>
+                <form onSubmit={handleSearch}>
+                    <input
+                        id="search-input"
+                        type="text"
+                        placeholder="Tìm kiếm sản phẩm (Tên, Mã hàng, Mã vạch)"
+                        value={searchTerm}
+                        onChange={handleSearchChange}
+                        autoFocus
+                        autoComplete
+                    />
+                    <button type="submit">Tìm kiếm</button>
+                </form>
 
-            {/* Hiển thị danh sách gợi ý */}
-            {suggestions.length > 0 && (
-                <ul className="suggestion-list">
-                    {suggestions.map((suggestion, index) => {
-                        const searchText = searchTerm.toLowerCase();
+                {/* Hiển thị danh sách gợi ý */}
+                {suggestions.length > 0 && (
+                    <ul className="suggestion-list">
+                        {suggestions.map((suggestion, index) => {
+                            const searchText = searchTerm.toLowerCase();
 
-                        // Tìm vị trí khớp trong từng trường
-                        const nameStartIndex = suggestion.name.toLowerCase().indexOf(searchText);
-                        const barcodeStartIndex = suggestion.barcode.toLowerCase().indexOf(searchText);
-                        const priceStartIndex = suggestion.sellingPrice.toString().indexOf(searchText);
+                            // Tìm vị trí khớp trong từng trường
+                            const nameStartIndex = suggestion.name.toLowerCase().indexOf(searchText);
+                            const barcodeStartIndex = suggestion.barcode.toLowerCase().indexOf(searchText);
+                            const priceStartIndex = suggestion.sellingPrice.toString().indexOf(searchText);
 
-                        return (
-                            <li
-                                key={index}
-                                className="list-item"
-                                onClick={() => handleSuggestionClick(suggestion)}
-                                style={{ cursor: 'pointer' }}
-                            >
-                                <div className="suggestion-item">
-                                    {/* Hình ảnh sản phẩm */}
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                            gap: '10px',
-                                        }}
-                                    >
-                                        <img
-                                            src={`${localhostImageBackEnd}${suggestion.image}`}
-                                            alt={suggestion.name}
-                                            style={{
-                                                width: '50px',
-                                                height: '50px',
-                                                objectFit: 'cover',
-                                                borderRadius: '5px',
-                                            }}
-                                        />
+                            return (
+                                <li
+                                    key={index}
+                                    className="list-item"
+                                    onClick={() => handleSuggestionClick(suggestion)}
+                                    style={{ cursor: 'pointer' }}
+                                >
+                                    <div className="suggestion-item">
+                                        {/* Hình ảnh sản phẩm */}
                                         <div
                                             style={{
                                                 display: 'flex',
-                                                justifyContent: 'space-between',
                                                 alignItems: 'center',
-                                                flex: 1,
+                                                gap: '10px',
                                             }}
                                         >
-                                            <div>
-                                                {/* Hiển thị tên sản phẩm với từ khóa được tô đậm */}
-                                                {nameStartIndex !== -1 ? (
-                                                    <div>
-                                                        {suggestion.name.substring(0, nameStartIndex)}
-                                                        <b>
+                                            <img
+                                                src={`${urlImage}${suggestion.image}`}
+                                                alt={suggestion.name}
+                                                style={{
+                                                    width: '50px',
+                                                    height: '50px',
+                                                    objectFit: 'cover',
+                                                    borderRadius: '5px',
+                                                }}
+                                            />
+                                            <div
+                                                style={{
+                                                    display: 'flex',
+                                                    justifyContent: 'space-between',
+                                                    alignItems: 'center',
+                                                    flex: 1,
+                                                }}
+                                            >
+                                                <div>
+                                                    {/* Hiển thị tên sản phẩm với từ khóa được tô đậm */}
+                                                    {nameStartIndex !== -1 ? (
+                                                        <div>
+                                                            {suggestion.name.substring(0, nameStartIndex)}
+                                                            <b>
+                                                                {suggestion.name.substring(
+                                                                    nameStartIndex,
+                                                                    nameStartIndex + searchTerm.length,
+                                                                )}
+                                                            </b>
                                                             {suggestion.name.substring(
-                                                                nameStartIndex,
                                                                 nameStartIndex + searchTerm.length,
                                                             )}
-                                                        </b>
-                                                        {suggestion.name.substring(nameStartIndex + searchTerm.length)}
-                                                    </div>
-                                                ) : (
-                                                    <div>{suggestion.name}</div>
-                                                )}
+                                                        </div>
+                                                    ) : (
+                                                        <div>{suggestion.name}</div>
+                                                    )}
 
-                                                {/* Hiển thị mã vạch với từ khóa được tô đậm */}
-                                                {barcodeStartIndex !== -1 ? (
-                                                    <div>
-                                                        {suggestion.barcode.substring(0, barcodeStartIndex)}
-                                                        <b>
+                                                    {/* Hiển thị mã vạch với từ khóa được tô đậm */}
+                                                    {barcodeStartIndex !== -1 ? (
+                                                        <div>
+                                                            {suggestion.barcode.substring(0, barcodeStartIndex)}
+                                                            <b>
+                                                                {suggestion.barcode.substring(
+                                                                    barcodeStartIndex,
+                                                                    barcodeStartIndex + searchTerm.length,
+                                                                )}
+                                                            </b>
                                                             {suggestion.barcode.substring(
-                                                                barcodeStartIndex,
                                                                 barcodeStartIndex + searchTerm.length,
                                                             )}
-                                                        </b>
-                                                        {suggestion.barcode.substring(
-                                                            barcodeStartIndex + searchTerm.length,
-                                                        )}
-                                                    </div>
-                                                ) : (
-                                                    <div>{suggestion.barcode}</div>
-                                                )}
-                                            </div>
-                                            <div>
-                                                {/* Hiển thị giá bán với từ khóa được tô đậm */}
-                                                {priceStartIndex !== -1 ? (
-                                                    <div>
-                                                        {suggestion.sellingPrice
-                                                            .toString()
-                                                            .substring(0, priceStartIndex)}
-                                                        <b>
+                                                        </div>
+                                                    ) : (
+                                                        <div>{suggestion.barcode}</div>
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    {/* Hiển thị giá bán với từ khóa được tô đậm */}
+                                                    {priceStartIndex !== -1 ? (
+                                                        <div>
                                                             {suggestion.sellingPrice
                                                                 .toString()
-                                                                .substring(
-                                                                    priceStartIndex,
-                                                                    priceStartIndex + searchTerm.length,
-                                                                )}
-                                                        </b>
-                                                        {suggestion.sellingPrice
-                                                            .toString()
-                                                            .substring(priceStartIndex + searchTerm.length)}{' '}
-                                                        VND
-                                                    </div>
-                                                ) : (
-                                                    <div>{suggestion.sellingPrice} VND</div>
-                                                )}
+                                                                .substring(0, priceStartIndex)}
+                                                            <b>
+                                                                {suggestion.sellingPrice
+                                                                    .toString()
+                                                                    .substring(
+                                                                        priceStartIndex,
+                                                                        priceStartIndex + searchTerm.length,
+                                                                    )}
+                                                            </b>
+                                                            {suggestion.sellingPrice
+                                                                .toString()
+                                                                .substring(priceStartIndex + searchTerm.length)}{' '}
+                                                            VND
+                                                        </div>
+                                                    ) : (
+                                                        <div>{suggestion.sellingPrice} VND</div>
+                                                    )}
+                                                </div>
                                             </div>
                                         </div>
                                     </div>
+                                </li>
+                            );
+                        })}
+                    </ul>
+                )}
+
+                {error && <p style={{ color: 'red' }}>{error}</p>}
+
+                <div>
+                    {searchResults.map((product) => (
+                        <div key={product._id}>
+                            <h4>{product.name}</h4>
+                            <p>Mã hàng: {product.productCode}</p>
+                            <p>Mã vạch: {product.barcode}</p>
+                            <p>Mô tả: {product.description}</p>
+                            <p>Giá bán: {product.sellingPrice} VND</p>
+                            <img src={`${urlImage}${product.image}`} alt="image" />
+                        </div>
+                    ))}
+                </div>
+
+                {/*  */}
+
+                {products.map(
+                    (item) =>
+                        cartItems[item._id] > 0 && (
+                            <div key={item._id} className="cart-container">
+                                <div className="cart-items-title cart-items-item">
+                                    <img src={`${urlImage}${item.image}`} alt={item.name} />
+                                    <p className="cart-items-name">{item.name}</p>
+                                    <p>{item.barcode}</p>
+                                    <p>{formatCurrency(item.sellingPrice)}</p>
+                                    <p className="quantity"> - {cartItems[item._id]} + </p>
+                                    <p>{formatCurrency(item.sellingPrice * cartItems[item._id])}</p>
+                                    {/* <p onClick={() => removeFromCart(item._id)} className="cross">
+                                            x
+                                        </p> */}
                                 </div>
-                            </li>
-                        );
-                    })}
-                </ul>
-            )}
-
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-
-            <div>
-                {searchResults.map((product) => (
-                    <div key={product._id}>
-                        <h4>{product.name}</h4>
-                        <p>Mã hàng: {product.productCode}</p>
-                        <p>Mã vạch: {product.barcode}</p>
-                        <p>Mô tả: {product.description}</p>
-                        <p>Giá bán: {product.sellingPrice} VND</p>
-                        <img src={`${localhostImageBackEnd}${product.image}`} alt="image" />
-                    </div>
-                ))}
+                                <hr />
+                            </div>
+                        ),
+                )}
             </div>
+            <div style={{ backgroundColor: 'red', height: '100%' }}></div>
         </div>
     );
 };

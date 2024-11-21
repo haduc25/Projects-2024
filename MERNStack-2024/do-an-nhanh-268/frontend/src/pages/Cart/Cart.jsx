@@ -30,6 +30,8 @@ const Cart = () => {
                 </div>
                 <br />
                 <hr />
+                {console.log('food_list: ', food_list)}
+                {console.log('cartItems: ', cartItems)}
                 {food_list.map(
                     (item) =>
                         cartItems[item._id] > 0 && (

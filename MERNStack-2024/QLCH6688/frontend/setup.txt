@@ -7,7 +7,7 @@ cd to folder
 npm install
 
 
-npm i react-router-dom
+npm i react-router-dom axios
 
 
 npm run dev
