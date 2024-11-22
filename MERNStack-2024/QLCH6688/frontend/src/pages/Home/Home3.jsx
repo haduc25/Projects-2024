@@ -2,8 +2,10 @@ import { useState, useEffect, useContext } from 'react';
 import './Home.css';
 import { StoreContext } from '../../context/StoreContext.jsx';
 
-// Giả sử số tiền khách thanh toán
-const KHACH_THANH_TOAN = 100000;
+const CHI_PHI_VAN_CHUYEN = 2000;
+
+// Khách thanh toán (giả sử số tiền khách đưa vào)
+let KHACH_THANH_TOAN = 5000; // Thay bằng số tiền khách thực sự thanh toán
 
 const Home = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -11,11 +13,7 @@ const Home = () => {
     const [suggestions, setSuggestions] = useState([]);
     const [error, setError] = useState('');
     const [paymentWarning, setPaymentWarning] = useState('');
-
     const [tongTien, setTongTien] = useState(0);
-    const [giamGia, setGiamGia] = useState(0);
-    const [tongTienSauGiamGia, setTongTienSauGiamGia] = useState(0);
-    const [tienThuaTraKhach, setTienThuaTraKhach] = useState(0);
 
     const {
         urlImage,
@@ -27,11 +25,8 @@ const Home = () => {
         getTotalCartQuantity,
         product_list,
     } = useContext(StoreContext);
-
     const { formatCurrency } = utilityFunctions;
-    const TONG_SO_LUONG_SAN_PHAM = getTotalCartQuantity();
 
-    // Shortcut tìm kiếm
     useEffect(() => {
         const handleKeyDown = (event) => {
             if (event.key === 'F3') {
@@ -39,33 +34,36 @@ const Home = () => {
                 document.getElementById('search-input').focus();
             }
         };
+
         window.addEventListener('keydown', handleKeyDown);
         return () => {
             window.removeEventListener('keydown', handleKeyDown);
         };
     }, []);
 
-    // Cập nhật tổng tiền mỗi khi giỏ hàng hoặc giảm giá thay đổi
-    useEffect(() => {
-        calcAmount();
-    }, [cartItems]);
+    // useEffect(() => {
+    //     calcAmount();
+    // }, [paymentWarning]);
 
     const handleSearchChange = (event) => {
         let value = event.target.value;
 
-        // Loại bỏ ký tự đặc biệt
+        // Hàm loại bỏ ký tự đặc biệt
         const removeSpecialChars = (input) => {
-            const specialChars = '!@#$%^&*()_+={}[]|\\:;"\'<>,.?/~`-';
+            const specialChars = '!@#$%^&*()_+={}[]|\\:;"\'<>,.?/~`-'; // Danh sách ký tự đặc biệt
             return input
                 .split('')
                 .filter((char) => !specialChars.includes(char))
                 .join('');
         };
 
+        // Loại bỏ ký tự đặc biệt
         value = removeSpecialChars(value);
+
         setSearchTerm(value);
 
         if (value.trim()) {
+            // Lọc danh sách gợi ý dựa trên tên hoặc mã vạch
             const filteredSuggestions = product_list
                 .filter(
                     (product) =>
@@ -77,10 +75,9 @@ const Home = () => {
                     name: product.name,
                     barcode: product.barcode,
                     sellingPrice: product.sellingPrice,
-                    image: product.image,
+                    image: product.image, // Thêm hình ảnh vào gợi ý
                 }))
                 .slice(0, 5); // Giới hạn 5 gợi ý
-
             setSuggestions(filteredSuggestions);
         } else {
             setSuggestions([]);
@@ -109,42 +106,99 @@ const Home = () => {
             return;
         }
 
+        // console.log('filteredProducts: ', filteredProducts[0]._id);
         addToCart(filteredProducts[0]._id);
+        console.log('cartItems: ', cartItems);
+        console.log('product_list: ', product_list);
         setSearchResults(filteredProducts);
+
+        // calc
+        calcAmount();
+
+        // Clear input fields
         setSearchTerm('');
-        setSuggestions([]);
+        setSuggestions([]); // Ẩn gợi ý sau khi tìm kiếm
     };
 
     const handleSuggestionClick = (suggestion) => {
-        setSearchTerm(suggestion.name);
-        setSuggestions([]);
+        setSearchTerm(suggestion.name); // Điền tên sản phẩm vào ô tìm kiếm
+        setSuggestions([]); // Ẩn danh sách gợi ý
     };
+
+    // // Tính tổng
+    // const TONG_TIEN_SAN_PHAM = getTotalCartAmount();
+    // const CHI_PHI_VAN_CHUYEN_THUC_TE = TONG_TIEN_SAN_PHAM === 0 ? 0 : CHI_PHI_VAN_CHUYEN;
+    // const TONG_TIEN = TONG_TIEN_SAN_PHAM + CHI_PHI_VAN_CHUYEN_THUC_TE;
+
+    // // Tính tổng
+    // Tổng tiền hàng
+    // Giảm giá
+    // Khách cần trả
+    // Khách thanh toán
+
+    // const TONG_TIEN_SAN_PHAM = getTotalCartAmount();
+    // // const CHI_PHI_VAN_CHUYEN_THUC_TE = TONG_TIEN_SAN_PHAM === 0 ? 0 : CHI_PHI_VAN_CHUYEN;
+    // // const TONG_TIEN = TONG_TIEN_SAN_PHAM + CHI_PHI_VAN_CHUYEN_THUC_TE;
+
+    // console.log(getTotalCartAmount());
+    // console.log('product_list: ', product_list);
+
+    // ################### TESTING ZONE ################# //
+    // Lấy tổng tiền sản phẩm
+    const TONG_TIEN_SAN_PHAM = getTotalCartAmount();
+    const TONG_SO_LUONG_SAN_PHAM = getTotalCartQuantity();
+
+    // Giảm giá
+    const GIAM_GIA = TONG_TIEN_SAN_PHAM > 0 ? 1000 : 0; // Giảm giá chỉ áp dụng nếu có sản phẩm
 
     const calcAmount = () => {
-        const TONG_TIEN_SAN_PHAM = getTotalCartAmount();
-        const GIAM_GIA = TONG_TIEN_SAN_PHAM > 0 ? 1000 : 0;
-        const TONG_TIEN_SAU_GIAM_GIA = TONG_TIEN_SAN_PHAM - GIAM_GIA;
+        // Tính toán chỉ khi TONG_TIEN_SAN_PHAM > 0
+        if (TONG_TIEN_SAN_PHAM > 0) {
+            // Tổng tiền sau giảm giá
+            const TONG_TIEN_SAU_GIAM_GIA = TONG_TIEN_SAN_PHAM - GIAM_GIA;
 
-        setTongTien(TONG_TIEN_SAN_PHAM);
-        setGiamGia(GIAM_GIA);
-        setTongTienSauGiamGia(TONG_TIEN_SAU_GIAM_GIA);
+            // Tiền thừa trả khách
+            const TIEN_THUA_TRA_KHACH = KHACH_THANH_TOAN - TONG_TIEN_SAU_GIAM_GIA;
 
-        const TIEN_THUA_TRA_KHACH = KHACH_THANH_TOAN - TONG_TIEN_SAU_GIAM_GIA;
+            // Tổng tiền cần thanh toán
+            const TONG_TIEN_CAN_TRA = TONG_TIEN_SAU_GIAM_GIA;
 
-        if (TIEN_THUA_TRA_KHACH < 0) {
-            setPaymentWarning(
-                `KHÁCH HÀNG CHƯA THANH TOÁN ĐỦ CÒN THIẾU ${formatCurrency(Math.abs(TIEN_THUA_TRA_KHACH))}`,
-            );
-            setTienThuaTraKhach(0);
+            setTongTien(TONG_TIEN_SAU_GIAM_GIA);
+
+            // In ra kết quả
+            console.log('Tổng tiền sản phẩm: ', TONG_TIEN_SAN_PHAM);
+            console.log('Tổng số lượng sản phẩm: ', TONG_SO_LUONG_SAN_PHAM);
+            console.log('Giảm giá: ', GIAM_GIA);
+            console.log('Tổng tiền sau giảm giá: ', TONG_TIEN_SAU_GIAM_GIA);
+            console.log('Số tiền khách thanh toán: ', KHACH_THANH_TOAN);
+            console.log('Tiền thừa trả khách: ', TIEN_THUA_TRA_KHACH);
+            console.log('Tổng tiền cần thanh toán: ', TONG_TIEN_CAN_TRA);
+
+            if (TIEN_THUA_TRA_KHACH < 0) {
+                setPaymentWarning(`KHÁCH HÀNG CHƯA THANH TOÁN ĐỦ CÒN THIẾU ${Math.abs(TIEN_THUA_TRA_KHACH)}`);
+            } else {
+                setPaymentWarning(''); // Xóa cảnh báo nếu khách đã thanh toán đủ
+            }
         } else {
+            // Nếu không có sản phẩm, các giá trị đặt về 0
+            console.log('Tổng tiền sản phẩm: ', TONG_TIEN_SAN_PHAM);
+            console.log('Tổng số lượng sản phẩm: ', TONG_SO_LUONG_SAN_PHAM);
+            console.log('Giảm giá: ', GIAM_GIA);
+            console.log('Tổng tiền sau giảm giá: ', 0);
+            console.log('Số tiền khách thanh toán: ', 0);
+            console.log('Tiền thừa trả khách: ', 0);
+            console.log('Tổng tiền cần thanh toán: ', 0);
+
+            setTongTien(0);
             setPaymentWarning('');
-            setTienThuaTraKhach(TIEN_THUA_TRA_KHACH);
+            console.log('Không có sản phẩm trong giỏ hàng.');
         }
     };
+    // ################### TESTING ZONE ################# //
 
     return (
         <div className="sale-container">
-            <div style={{ backgroundColor: 'lightblue' }}>
+            <div style={{ backgroundColor: 'yellow' }}>
                 <form onSubmit={handleSearch} autoComplete="off">
                     <input
                         id="search-input"
@@ -153,6 +207,7 @@ const Home = () => {
                         value={searchTerm}
                         onChange={handleSearchChange}
                         autoFocus
+                        autoComplete="off"
                     />
                     <button type="submit">Tìm kiếm</button>
                 </form>
@@ -273,6 +328,7 @@ const Home = () => {
                 )}
 
                 {error && <p style={{ color: 'red' }}>{error}</p>}
+
                 <div>
                     {searchResults.map((product) => (
                         <div key={product._id}>
@@ -286,29 +342,28 @@ const Home = () => {
                     ))}
                 </div>
 
-                <div>
-                    {product_list.map(
-                        (item) =>
-                            cartItems[item._id] > 0 && (
-                                <div key={item._id} className="cart-container">
-                                    <div className="cart-items-title cart-items-item">
-                                        <img src={`${urlImage}${item.image}`} alt={item.name} />
-                                        <p className="cart-items-name">{item.name}</p>
-                                        <p>{item.barcode}</p>
-                                        <p>{formatCurrency(item.sellingPrice)}</p>
-                                        <p className="quantity"> - {cartItems[item._id]} + </p>
-                                        <p>{formatCurrency(item.sellingPrice * cartItems[item._id])}</p>
-                                        {/* <p onClick={() => removeFromCart(item._id)} className="cross">
-                                                x
-                                            </p> */}
-                                    </div>
-                                    <hr />
-                                </div>
-                            ),
-                    )}
-                </div>
-            </div>
+                {/*  */}
 
+                {product_list.map(
+                    (item) =>
+                        cartItems[item._id] > 0 && (
+                            <div key={item._id} className="cart-container">
+                                <div className="cart-items-title cart-items-item">
+                                    <img src={`${urlImage}${item.image}`} alt={item.name} />
+                                    <p className="cart-items-name">{item.name}</p>
+                                    <p>{item.barcode}</p>
+                                    <p>{formatCurrency(item.sellingPrice)}</p>
+                                    <p className="quantity"> - {cartItems[item._id]} + </p>
+                                    <p>{formatCurrency(item.sellingPrice * cartItems[item._id])}</p>
+                                    {/* <p onClick={() => removeFromCart(item._id)} className="cross">
+                                            x
+                                        </p> */}
+                                </div>
+                                <hr />
+                            </div>
+                        ),
+                )}
+            </div>
             <div style={{ height: '100%' }}>
                 <div className="cart-bottom">
                     <div className="cart-total">
@@ -320,34 +375,28 @@ const Home = () => {
                             </div>
                             <div className="cart-total-details">
                                 <p>Tổng tiền hàng</p>
-                                <p>{formatCurrency(tongTien)}</p>
+                                {/* <p>{formatCurrency(TONG_TIEN_SAN_PHAM)}</p> */}
                             </div>
                             <hr />
                             <div className="cart-total-details">
                                 <p>Giảm giá</p>
-                                <p>{formatCurrency(giamGia)}</p>
+                                {/* <p>{formatCurrency(GIAM_GIA)}</p> */}
                             </div>
                             <hr />
                             <div className="cart-total-details">
                                 <p>Khách cần trả</p>
-                                <p>{formatCurrency(tongTienSauGiamGia)}</p>
+                                {/* <p>{formatCurrency(tongTien)}</p> */}
                             </div>
                             <hr />
                             <div className="cart-total-details">
                                 <b>Khách thanh toán</b>
-                                <b>{formatCurrency(KHACH_THANH_TOAN)}</b>
+                                {/* <b>{formatCurrency(KHACH_THANH_TOAN)}</b> */}
                             </div>
                             <p style={{ color: 'red' }}>{paymentWarning}</p>
-
-                            <hr />
-                            <div className="cart-total-details">
-                                <b>Tiền thừa trả khách</b>
-                                <b>{formatCurrency(tienThuaTraKhach)}</b>
-                            </div>
                         </div>
                         <button onClick={() => navigate('/dat-hang')}>MUA HÀNG</button>
                     </div>
-                    {/* <div className="cart-promocode">
+                    <div className="cart-promocode">
                         <div>
                             <p>Nếu bạn có mã giảm giá, Nhập vào đây</p>
                             <div className="cart-promocode-input">
@@ -355,7 +404,7 @@ const Home = () => {
                                 <button>Áp dụng</button>
                             </div>
                         </div>
-                    </div> */}
+                    </div>
                 </div>
             </div>
         </div>

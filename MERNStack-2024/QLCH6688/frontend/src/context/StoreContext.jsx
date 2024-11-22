@@ -1,13 +1,14 @@
 import axios from 'axios';
 import { createContext, useEffect, useState } from 'react';
-// import { food_list } from '../assets/assets_vn';
+// import { product_list } from '../assets/assets_vn';
+import { products as product_list } from '../assets/products.js';
 
 // Tạo Context: Context này sẽ giúp chia sẻ dữ liệu trong toàn bộ ứng dụng mà không cần phải truyền qua props từng cấp
 export const StoreContext = createContext(null);
 
 /** StoreContextProvider Component
- * StoreContextProvider là một component bao bọc (wrapper) được sử dụng để cung cấp giá trị của food_list cho các component con thông qua Context.
- * contextValue: Được khởi tạo với food_list, đây chính là giá trị sẽ được truyền tới các component con.
+ * StoreContextProvider là một component bao bọc (wrapper) được sử dụng để cung cấp giá trị của product_list cho các component con thông qua Context.
+ * contextValue: Được khởi tạo với product_list, đây chính là giá trị sẽ được truyền tới các component con.
  * StoreContext.Provider: Sử dụng Provider để cung cấp contextValue cho tất cả các component con bên trong ({props.children}).
  */
 const StoreContextProvider = (props) => {
@@ -17,7 +18,7 @@ const StoreContextProvider = (props) => {
     const urlImage = 'http://localhost:6868/images/';
     // const [token, setToken] = useState('');
     const [token, setToken] = useState('');
-    const [food_list, setFoodList] = useState([]);
+    // const [product_list, setProductList] = useState([]);
 
     // ADD TO CART
     const addToCart = async (itemId) => {
@@ -62,18 +63,30 @@ const StoreContextProvider = (props) => {
 
         for (const item in cartItems) {
             if (cartItems[item] > 0) {
-                // Tìm sản phẩm tương ứng trong danh sách food_list dựa trên _id | Để tăng hiệu suất tìm kiếm có thể thay `find()` bằng cách sử dụng `map()`
-                let itemInfo = food_list.find((product) => product._id === item);
+                // Tìm sản phẩm tương ứng trong danh sách product_list dựa trên _id | Để tăng hiệu suất tìm kiếm có thể thay `find()` bằng cách sử dụng `map()`
+                let itemInfo = product_list.find((product) => product._id === item);
                 // Tính tổng tiền
-                totalAmount += itemInfo.price * cartItems[item];
+                totalAmount += itemInfo.sellingPrice * cartItems[item];
             }
         }
         return totalAmount;
     };
 
+    const getTotalCartQuantity = () => {
+        let totalQuantity = 0;
+
+        for (const item in cartItems) {
+            if (cartItems[item] > 0) {
+                totalQuantity += cartItems[item];
+            }
+        }
+
+        return totalQuantity;
+    };
+
     const fetchFoodList = async () => {
         const response = await axios.get(url + 'api/food/list');
-        setFoodList(response.data.data);
+        setProductList(response.data.data);
     };
 
     const loadCartData = async (token) => {
@@ -87,16 +100,16 @@ const StoreContextProvider = (props) => {
     // }, [cartItems]);
 
     // get data from local storage
-    useEffect(() => {
-        async function loadData() {
-            await fetchFoodList();
-            if (localStorage.getItem('token')) {
-                setToken(localStorage.getItem('token'));
-                await loadCartData(localStorage.getItem('token'));
-            }
-        }
-        loadData();
-    }, []);
+    // useEffect(() => {
+    //     async function loadData() {
+    //         await fetchFoodList();
+    //         if (localStorage.getItem('token')) {
+    //             setToken(localStorage.getItem('token'));
+    //             await loadCartData(localStorage.getItem('token'));
+    //         }
+    //     }
+    //     loadData();
+    // }, []);
 
     // Global Functions
     const utilityFunctions = {
@@ -109,12 +122,13 @@ const StoreContextProvider = (props) => {
     };
 
     const contextValue = {
-        food_list,
+        product_list,
         cartItems,
         setCartItems,
         addToCart,
         removeFromCart,
         getTotalCartAmount,
+        getTotalCartQuantity,
         utilityFunctions,
         url,
         urlImage,
