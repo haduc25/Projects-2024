@@ -4,6 +4,7 @@ const batchSchema = new mongoose.Schema({
     entryDate: { type: String, required: true }, // Ngày nhập hàng
     batchNumber: { type: String, required: true }, // Số lô hàng
     expirationDate: { type: String, required: true }, // Hạn sử dụng của lô hàng
+    purchasePrice: { type: Number, required: true }, // Giá nhập của lô hàng
 });
 
 const productSchema = new mongoose.Schema({
@@ -12,7 +13,7 @@ const productSchema = new mongoose.Schema({
     name: { type: String, required: true }, // Tên sản phẩm
     category: { type: String, required: true }, // Danh mục
     brand: { type: String }, // Thương hiệu
-    purchasePrice: { type: Number, required: true }, // Giá nhập
+    purchasePrice: { type: Number, required: true }, // Giá nhập chung
     sellingPrice: { type: Number, required: true }, // Giá bán
     unit: { type: String, required: true }, // Đơn vị tính
     stock: { type: Number, required: true }, // Tồn kho

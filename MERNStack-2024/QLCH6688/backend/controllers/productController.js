@@ -14,6 +14,7 @@ const addProduct = async (req, res) => {
             entryDate: req.body[`batches[${i}].entryDate`],
             batchNumber: `BATCH${(i + 1).toString().padStart(3, '0')}`, // Tự động tạo batchNumber
             expirationDate: req.body[`batches[${i}].expirationDate`],
+            purchasePrice: req.body[`batches[${i}].purchasePrice`], // Thêm giá nhập cho lô hàng
         });
         i++;
     }
@@ -73,47 +74,12 @@ const removeProduct = async (req, res) => {
     }
 };
 
-// Nhập hàng (cập nhật thông tin lô hàng cho sản phẩm)
-// const addBatchToProduct = async (req, res) => {
-//     const { productCode, entryDate, batchNumber, expirationDate } = req.body;
-
-//     // Log dữ liệu nhận được từ body để kiểm tra
-//     console.log('Dữ liệu nhận được từ body:', req.body);
-
-//     // Kiểm tra xem thông tin đã đầy đủ chưa
-//     if (!productCode || !entryDate || !batchNumber || !expirationDate) {
-//         return res.status(400).json({ success: false, message: 'Thông tin không đầy đủ' });
-//     }
-
-//     try {
-//         // Tìm sản phẩm theo productCode
-//         const product = await productModel.findOne({ productCode });
-
-//         if (!product) {
-//             return res.status(404).json({ success: false, message: 'Sản phẩm không tìm thấy' });
-//         }
-
-//         // Thêm thông tin lô hàng mới vào mảng `batches`
-//         product.batches.push({
-//             entryDate,
-//             batchNumber,
-//             expirationDate,
-//         });
-
-//         // Lưu lại sản phẩm với mảng `batches` đã được cập nhật
-//         await product.save();
-
-//         res.json({ success: true, message: 'Đã thêm lô hàng thành công', data: product });
-//     } catch (error) {
-//         res.status(500).json({ success: false, message: `Lỗi: ${error.message}` });
-//     }
-// };
-
+// Thêm lô hàng mới (cập nhật thông tin lô hàng cho sản phẩm)
 const addBatchToProduct = async (req, res) => {
-    const { productCode, entryDate, expirationDate } = req.body;
+    const { productCode, entryDate, expirationDate, purchasePrice } = req.body;
 
     // Kiểm tra xem thông tin đã đầy đủ chưa
-    if (!productCode || !entryDate || !expirationDate) {
+    if (!productCode || !entryDate || !expirationDate || !purchasePrice) {
         return res.status(400).json({ success: false, message: 'Thông tin không đầy đủ' });
     }
 
@@ -133,6 +99,7 @@ const addBatchToProduct = async (req, res) => {
             entryDate,
             batchNumber: newBatchNumber,
             expirationDate,
+            purchasePrice, // Thêm giá nhập cho lô hàng mới
         });
 
         // Lưu lại sản phẩm với mảng `batches` đã được cập nhật
