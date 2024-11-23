@@ -348,6 +348,8 @@ const Home = () => {
                                 <div key={item._id} className="cart-container">
                                     <div className="cart-items-title cart-items-item">
                                         <img
+                                            onClick={() => handleProductClick(item)}
+                                            title="Nhấn để xem chi tiết"
                                             className="img-san-pham"
                                             src={`${urlImage}${item.image}`}
                                             alt={item.name}

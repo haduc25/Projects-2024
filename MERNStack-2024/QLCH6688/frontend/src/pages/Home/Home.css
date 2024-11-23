@@ -113,6 +113,10 @@
     object-fit: cover;
 }
 
+.cart-items-item .img-san-pham:hover {
+    cursor: pointer;
+}
+
 .cart-items-item .cross {
     cursor: pointer;
 }

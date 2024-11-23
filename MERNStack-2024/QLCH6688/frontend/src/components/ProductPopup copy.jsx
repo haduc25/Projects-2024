@@ -1,13 +1,10 @@
-import React, { useState, useContext } from 'react';
+import React, { useContext } from 'react';
 import './ProductPopup.css'; // CSS tùy chỉnh
 import { StoreContext } from '../context/StoreContext';
 
 const ProductPopup = ({ product, onClose }) => {
     const { urlImage, utilityFunctions } = useContext(StoreContext);
-    const { formatDate, formatCurrency } = utilityFunctions;
-
-    // State để kiểm tra xem giá nhập có hiển thị hay không
-    const [isPriceVisible, setIsPriceVisible] = useState(false);
+    const { formatDate } = utilityFunctions;
 
     if (!product) return null;
 
@@ -17,9 +14,7 @@ const ProductPopup = ({ product, onClose }) => {
         }
     };
 
-    const togglePriceVisibility = () => {
-        setIsPriceVisible(!isPriceVisible);
-    };
+    console.log('product: ', product);
 
     return (
         <div className="popup-overlay" onClick={handleOverlayClick}>
@@ -46,25 +41,25 @@ const ProductPopup = ({ product, onClose }) => {
                     <strong>Mô tả:</strong> {product.description || 'Chưa có mô tả'}
                 </p>
                 <p>
-                    <strong>Thương hiệu:</strong> {product.brand}
+                    <strong>Thương hiệu</strong> {product.brand}
                 </p>
                 <p>
-                    <strong>Loại hàng:</strong> {product.category}
+                    <strong>Loại hàng</strong> {product.category}
                 </p>
                 <p>
-                    <strong>Ngày nhập:</strong> {formatDate(product.createdAt)}
+                    <strong>Ngày nhập</strong> {formatDate(product.createdAt)}
                 </p>
                 <p>
-                    <strong>Lần cuối cập nhật:</strong> {formatDate(product.updatedAt)}
+                    <strong>Lần cuối cập nhật</strong> {formatDate(product.updatedAt)}
                 </p>
-                <div style={{ display: 'flex' }}>
-                    <p style={{ marginRight: '12px' }}>
-                        <strong>Giá nhập:</strong> {isPriceVisible ? formatCurrency(product.purchasePrice) : '******'}{' '}
-                    </p>
-                    <button onClick={togglePriceVisibility}>{isPriceVisible ? 'Ẩn giá' : 'Hiện giá'}</button>
-                </div>
                 <p>
-                    <strong>Giá bán:</strong> {formatCurrency(product.sellingPrice)}
+                    <strong>Loại hàng</strong> {product.category}
+                </p>
+                <p>
+                    <strong>Giá nhập:</strong> {product.purchasePrice.toLocaleString()} VND
+                </p>
+                <p>
+                    <strong>Giá bán:</strong> {product.sellingPrice.toLocaleString()} VND
                 </p>
                 <p>
                     <strong>Tồn kho:</strong> {product.stock}
