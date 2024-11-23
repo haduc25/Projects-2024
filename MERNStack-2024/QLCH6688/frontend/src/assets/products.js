@@ -1,3 +1,15 @@
+import add_icon_white from './icons/add_icon_white.png';
+import add_icon_green from './icons/add_icon_green.png';
+import remove_icon_red from './icons/remove_icon_red.png';
+import cross_icon from './icons/cross_icon.png';
+
+export const icons = {
+    add_icon_white,
+    add_icon_green,
+    remove_icon_red,
+    cross_icon,
+};
+
 export const products = [
     {
         _id: '673de70efd11c26fa6f7f7bb',

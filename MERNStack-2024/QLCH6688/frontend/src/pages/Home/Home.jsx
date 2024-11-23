@@ -1,6 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
 import './Home.css';
 import { StoreContext } from '../../context/StoreContext.jsx';
+import { icons } from '../../assets/products.js';
+import ProductPopup from '../../components/ProductPopup.jsx';
 
 const Home = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -15,11 +17,31 @@ const Home = () => {
     const [tienThuaTraKhach, setTienThuaTraKhach] = useState(0);
     const [khachThanhToan, setKhachThanhToan] = useState(0); // Khách thanh toán nhập từ bàn phím
 
-    const { urlImage, cartItems, addToCart, utilityFunctions, getTotalCartAmount, getTotalCartQuantity, product_list } =
-        useContext(StoreContext);
+    const {
+        urlImage,
+        cartItems,
+        addToCart,
+        removeFromCart,
+        updateCartItemQuantity,
+        utilityFunctions,
+        getTotalCartAmount,
+        getTotalCartQuantity,
+        product_list,
+    } = useContext(StoreContext);
 
     const { formatCurrency } = utilityFunctions;
     const TONG_SO_LUONG_SAN_PHAM = getTotalCartQuantity();
+
+    // Popups
+    const [selectedProduct, setSelectedProduct] = useState(null); // Trạng thái sản phẩm được chọn
+
+    const handleProductClick = (product) => {
+        setSelectedProduct(product); // Hiển thị popup với sản phẩm được chọn
+    };
+
+    const handleClosePopup = () => {
+        setSelectedProduct(null); // Đóng popup
+    };
 
     // Shortcut tìm kiếm
     useEffect(() => {
@@ -107,8 +129,8 @@ const Home = () => {
     };
 
     const calcAmount = () => {
-        // const TONG_TIEN_SAN_PHAM = getTotalCartAmount();
-        const TONG_TIEN_SAN_PHAM = 100000;
+        const TONG_TIEN_SAN_PHAM = getTotalCartAmount();
+        // const TONG_TIEN_SAN_PHAM = 100000;
         const TONG_TIEN_SAU_GIAM_GIA = TONG_TIEN_SAN_PHAM - giamGia;
 
         setTongTien(TONG_TIEN_SAN_PHAM);
@@ -185,7 +207,9 @@ const Home = () => {
                         onChange={handleSearchChange}
                         autoFocus
                     />
-                    <button type="submit">Tìm kiếm</button>
+                    <button type="submit" className="sale-btn-tim-kiem">
+                        Tìm kiếm
+                    </button>
                 </form>
 
                 {/* Hiển thị danh sách gợi ý */}
@@ -304,7 +328,7 @@ const Home = () => {
                 )}
 
                 {error && <p style={{ color: 'red' }}>{error}</p>}
-                <div>
+                {/* <div>
                     {searchResults.map((product) => (
                         <div key={product._id}>
                             <h4>{product.name}</h4>
@@ -315,7 +339,7 @@ const Home = () => {
                             <img src={`${urlImage}${product.image}`} alt="image" />
                         </div>
                     ))}
-                </div>
+                </div> */}
 
                 <div>
                     {product_list.map(
@@ -323,12 +347,70 @@ const Home = () => {
                             cartItems[item._id] > 0 && (
                                 <div key={item._id} className="cart-container">
                                     <div className="cart-items-title cart-items-item">
-                                        <img src={`${urlImage}${item.image}`} alt={item.name} />
-                                        <p className="cart-items-name">{item.name}</p>
-                                        <p>{item.barcode}</p>
-                                        <p>{formatCurrency(item.sellingPrice)}</p>
-                                        <p className="quantity"> - {cartItems[item._id]} + </p>
-                                        <p>{formatCurrency(item.sellingPrice * cartItems[item._id])}</p>
+                                        <img
+                                            className="img-san-pham"
+                                            src={`${urlImage}${item.image}`}
+                                            alt={item.name}
+                                        />
+                                        <p
+                                            onClick={() => handleProductClick(item)} // Hiển thị popup khi nhấn vào tên
+                                            title="Nhấn để xem chi tiết"
+                                            className="cart-items-name"
+                                        >
+                                            {item.name}
+                                        </p>
+                                        <p title="Mã vạch sản phẩm">{item.barcode}</p>
+                                        <p title="Giá bán sản phẩm">{formatCurrency(item.sellingPrice)}</p>
+                                        {/* <p className="quantity"> - {cartItems[item._id]} + </p> */}
+                                        {/* <p className="quantity">
+                                            <img src={icons.remove_icon_red} alt="add icon" className="add" />
+                                            {cartItems[item._id]}
+                                            <img src={icons.add_icon_green} alt="add icon" className="add" />
+                                        </p> */}
+                                        {/* <img onClick={() => addToCart(id)} src={icon.add_icon_white} alt="add icon" className="add" /> */}
+                                        {/* START */}
+                                        <div className="product-item-counter">
+                                            <img
+                                                title="Xóa đi một sản phẩm"
+                                                onClick={() => removeFromCart(item._id)}
+                                                src={icons.remove_icon_red}
+                                                alt="icon xóa sản phẩm"
+                                            />
+                                            {/* <p>{cartItems[item._id]}</p> */}
+                                            <input
+                                                title="Nhập số lượng sản phẩm"
+                                                style={{
+                                                    textAlign: 'center',
+                                                    outline: 'none',
+                                                    border: 'none',
+                                                    maxWidth: '28px',
+                                                    marginLeft: '-8px',
+                                                    marginRight: '-8px',
+                                                    backgroundColor: 'inherit',
+                                                }}
+                                                type="text"
+                                                // value={cartItems[item._id]}
+                                                // onChange={(e) => {
+                                                //     // const value = parseInt(e.target.value, 10) || 0;
+                                                //     // setGiamGia(value);
+                                                // }}
+                                                value={cartItems[item._id] || 0} // Hiển thị số lượng hiện tại
+                                                onChange={(e) =>
+                                                    updateCartItemQuantity(item._id, parseInt(e.target.value, 10) || 0)
+                                                } // Gọi hàm cập nhật
+                                                maxLength={3}
+                                            />
+                                            <img
+                                                title="Thêm một sản phẩm"
+                                                onClick={() => addToCart(item._id)}
+                                                src={icons.add_icon_green}
+                                                alt="icon thêm sản phẩm"
+                                            />
+                                        </div>
+                                        {/* END */}
+                                        <p title="Giá sản phẩm (giá bán x số lượng)">
+                                            {formatCurrency(item.sellingPrice * cartItems[item._id])}
+                                        </p>
                                         {/* <p onClick={() => removeFromCart(item._id)} className="cross">
                                                 x
                                             </p> */}
@@ -337,6 +419,9 @@ const Home = () => {
                                 </div>
                             ),
                     )}
+
+                    {/* Popup chi tiết sản phẩm */}
+                    <ProductPopup product={selectedProduct} onClose={handleClosePopup} />
                 </div>
             </div>
 
@@ -409,7 +494,7 @@ const Home = () => {
                                 <p style={{ color: 'red' }}>{paymentWarning}</p>
                             </div>
                             <hr />
-                            <div className="cart-total-details">
+                            <div className="cart-total-details" style={{ paddingTop: '50px' }}>
                                 <b>Tiền thừa trả khách</b>
                                 <b>{formatCurrency(tienThuaTraKhach)}</b>
                             </div>

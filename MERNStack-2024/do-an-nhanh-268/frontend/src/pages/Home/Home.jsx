@@ -5,6 +5,9 @@ import ExploreMenu from '../../components/ExploreMenu/ExploreMenu';
 import FoodDisplay from '../../components/FoodDisplay/FoodDisplay';
 import AppDownload from '../../components/AppDownload/AppDownload';
 
+const DANG_NHAP = 'Đăng nhập';
+const DANG_KY = 'Đăng ký';
+
 const Home = () => {
     const [category, setCategory] = useState('All');
     return (
