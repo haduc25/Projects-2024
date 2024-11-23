@@ -3,10 +3,20 @@ import fs from 'fs';
 
 // Thêm sản phẩm mới
 const addProduct = async (req, res) => {
-    let image_filename = `${req.file.filename}`;
+    let image_filename = req.file ? `${req.file.filename}` : null;
 
-    console.log('ProductController_req-body: ', req.body);
-    console.log('ProductController_req.file: ', req.file);
+    // Tạo mảng batches từ form-data và tự động thêm batchNumber
+    const batches = [];
+    let i = 0;
+
+    while (req.body[`batches[${i}].entryDate`]) {
+        batches.push({
+            entryDate: req.body[`batches[${i}].entryDate`],
+            batchNumber: `BATCH${(i + 1).toString().padStart(3, '0')}`, // Tự động tạo batchNumber
+            expirationDate: req.body[`batches[${i}].expirationDate`],
+        });
+        i++;
+    }
 
     const product = new productModel({
         productCode: req.body.productCode,
@@ -27,13 +37,14 @@ const addProduct = async (req, res) => {
             email: req.body.supplierEmail,
         },
         image: image_filename,
+        batches: batches, // Lưu thông tin lô hàng dưới dạng mảng
     });
 
     try {
         await product.save();
-        res.json({ success: true, message: 'Đã thêm sản phẩm thành công' });
+        res.json({ success: true, message: 'Đã thêm sản phẩm thành công', data: product });
     } catch (error) {
-        res.json({ success: false, message: `Lỗi: ${error.message}` });
+        res.status(500).json({ success: false, message: `Lỗi: ${error.message}` });
     }
 };
 
@@ -62,4 +73,75 @@ const removeProduct = async (req, res) => {
     }
 };
 
-export { addProduct, listAllProducts, removeProduct };
+// Nhập hàng (cập nhật thông tin lô hàng cho sản phẩm)
+// const addBatchToProduct = async (req, res) => {
+//     const { productCode, entryDate, batchNumber, expirationDate } = req.body;
+
+//     // Log dữ liệu nhận được từ body để kiểm tra
+//     console.log('Dữ liệu nhận được từ body:', req.body);
+
+//     // Kiểm tra xem thông tin đã đầy đủ chưa
+//     if (!productCode || !entryDate || !batchNumber || !expirationDate) {
+//         return res.status(400).json({ success: false, message: 'Thông tin không đầy đủ' });
+//     }
+
+//     try {
+//         // Tìm sản phẩm theo productCode
+//         const product = await productModel.findOne({ productCode });
+
+//         if (!product) {
+//             return res.status(404).json({ success: false, message: 'Sản phẩm không tìm thấy' });
+//         }
+
+//         // Thêm thông tin lô hàng mới vào mảng `batches`
+//         product.batches.push({
+//             entryDate,
+//             batchNumber,
+//             expirationDate,
+//         });
+
+//         // Lưu lại sản phẩm với mảng `batches` đã được cập nhật
+//         await product.save();
+
+//         res.json({ success: true, message: 'Đã thêm lô hàng thành công', data: product });
+//     } catch (error) {
+//         res.status(500).json({ success: false, message: `Lỗi: ${error.message}` });
+//     }
+// };
+
+const addBatchToProduct = async (req, res) => {
+    const { productCode, entryDate, expirationDate } = req.body;
+
+    // Kiểm tra xem thông tin đã đầy đủ chưa
+    if (!productCode || !entryDate || !expirationDate) {
+        return res.status(400).json({ success: false, message: 'Thông tin không đầy đủ' });
+    }
+
+    try {
+        // Tìm sản phẩm theo productCode
+        const product = await productModel.findOne({ productCode });
+
+        if (!product) {
+            return res.status(404).json({ success: false, message: 'Sản phẩm không tìm thấy' });
+        }
+
+        // Tạo batchNumber mới bằng cách sử dụng mảng batches và tăng dần số lô
+        const newBatchNumber = `BATCH${(product.batches.length + 1).toString().padStart(3, '0')}`;
+
+        // Thêm thông tin lô hàng mới vào mảng `batches`
+        product.batches.push({
+            entryDate,
+            batchNumber: newBatchNumber,
+            expirationDate,
+        });
+
+        // Lưu lại sản phẩm với mảng `batches` đã được cập nhật
+        await product.save();
+
+        res.json({ success: true, message: 'Đã thêm lô hàng thành công', data: product });
+    } catch (error) {
+        res.status(500).json({ success: false, message: `Lỗi: ${error.message}` });
+    }
+};
+
+export { addProduct, listAllProducts, removeProduct, addBatchToProduct };

@@ -1,11 +1,5 @@
 import mongoose from 'mongoose';
 
-const batchSchema = new mongoose.Schema({
-    entryDate: { type: String, required: true }, // Ngày nhập hàng
-    batchNumber: { type: String, required: true }, // Số lô hàng
-    expirationDate: { type: String, required: true }, // Hạn sử dụng của lô hàng
-});
-
 const productSchema = new mongoose.Schema({
     productCode: { type: String, required: true, unique: true }, // Mã hàng
     barcode: { type: String, required: true, unique: true }, // Mã vạch
@@ -28,7 +22,6 @@ const productSchema = new mongoose.Schema({
     image: { type: String }, // Hình ảnh
     createdAt: { type: Date, default: Date.now }, // Ngày tạo
     updatedAt: { type: Date, default: Date.now }, // Ngày cập nhật
-    batches: [batchSchema], // Mảng các lô hàng
 });
 
 // Middleware để tự động cập nhật `updatedAt` khi chỉnh sửa

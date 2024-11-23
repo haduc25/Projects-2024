@@ -1,10 +1,9 @@
 import express from 'express';
-import { addProduct, listAllProducts, removeProduct, addBatchToProduct } from '../controllers/productController.js';
+import { addProduct, listAllProducts, removeProduct } from '../controllers/productController.js';
 import multer from 'multer';
 
 const productRouter = express.Router();
 
-// Cấu hình lưu trữ ảnh
 const storage = multer.diskStorage({
     destination: 'uploads',
     filename: (req, file, cb) => {
@@ -14,16 +13,8 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage: storage });
 
-// Route thêm sản phẩm mới
 productRouter.post('/themsanpham', upload.single('image'), addProduct);
-
-// Route danh sách tất cả sản phẩm
 productRouter.get('/danhsachsanpham', listAllProducts);
-
-// Route xoá sản phẩm
 productRouter.post('/xoasanpham', removeProduct);
-
-// Route nhập hàng (cập nhật lô hàng cho sản phẩm)
-productRouter.post('/nhaphang', addBatchToProduct);
 
 export default productRouter;
