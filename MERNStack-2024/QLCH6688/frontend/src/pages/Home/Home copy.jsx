@@ -1,9 +1,8 @@
 import { useState, useEffect, useContext } from 'react';
 import './Home.css';
 import { StoreContext } from '../../context/StoreContext.jsx';
-
-// Giả sử số tiền khách thanh toán
-const KHACH_THANH_TOAN = 100000;
+import { icons } from '../../assets/products.js';
+import ProductPopup from '../../components/ProductPopup.jsx';
 
 const Home = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -13,15 +12,17 @@ const Home = () => {
     const [paymentWarning, setPaymentWarning] = useState('');
 
     const [tongTien, setTongTien] = useState(0);
-    const [giamGia, setGiamGia] = useState(0);
+    const [giamGia, setGiamGia] = useState(0); // Giảm giá nhập từ bàn phím
     const [tongTienSauGiamGia, setTongTienSauGiamGia] = useState(0);
     const [tienThuaTraKhach, setTienThuaTraKhach] = useState(0);
+    const [khachThanhToan, setKhachThanhToan] = useState(0); // Khách thanh toán nhập từ bàn phím
 
     const {
         urlImage,
         cartItems,
         addToCart,
         removeFromCart,
+        updateCartItemQuantity,
         utilityFunctions,
         getTotalCartAmount,
         getTotalCartQuantity,
@@ -30,6 +31,17 @@ const Home = () => {
 
     const { formatCurrency } = utilityFunctions;
     const TONG_SO_LUONG_SAN_PHAM = getTotalCartQuantity();
+
+    // Popups
+    const [selectedProduct, setSelectedProduct] = useState(null); // Trạng thái sản phẩm được chọn
+
+    const handleProductClick = (product) => {
+        setSelectedProduct(product); // Hiển thị popup với sản phẩm được chọn
+    };
+
+    const handleClosePopup = () => {
+        setSelectedProduct(null); // Đóng popup
+    };
 
     // Shortcut tìm kiếm
     useEffect(() => {
@@ -45,14 +57,13 @@ const Home = () => {
         };
     }, []);
 
-    // Cập nhật tổng tiền mỗi khi giỏ hàng hoặc giảm giá thay đổi
+    // Cập nhật tổng tiền mỗi khi giỏ hàng, giảm giá hoặc khách thanh toán thay đổi
     useEffect(() => {
         calcAmount();
-    }, [cartItems]);
+    }, [cartItems, giamGia, khachThanhToan]);
 
     const handleSearchChange = (event) => {
         let value = event.target.value;
-
         // Loại bỏ ký tự đặc biệt
         const removeSpecialChars = (input) => {
             const specialChars = '!@#$%^&*()_+={}[]|\\:;"\'<>,.?/~`-';
@@ -61,10 +72,9 @@ const Home = () => {
                 .filter((char) => !specialChars.includes(char))
                 .join('');
         };
-
         value = removeSpecialChars(value);
+        setSearchTerm(event.target.value);
         setSearchTerm(value);
-
         if (value.trim()) {
             const filteredSuggestions = product_list
                 .filter(
@@ -80,7 +90,6 @@ const Home = () => {
                     image: product.image,
                 }))
                 .slice(0, 5); // Giới hạn 5 gợi ý
-
             setSuggestions(filteredSuggestions);
         } else {
             setSuggestions([]);
@@ -89,6 +98,7 @@ const Home = () => {
 
     const handleSearch = (e) => {
         e.preventDefault();
+        // Thực hiện tìm kiếm ở đây
         if (!searchTerm.trim()) {
             setError('Vui lòng nhập thông tin tìm kiếm!');
             return;
@@ -103,12 +113,10 @@ const Home = () => {
                 product.sellingPrice.toString().includes(searchText)
             );
         });
-
         if (filteredProducts.length === 0) {
             setError(`Không tìm thấy sản phẩm nào phù hợp với từ khóa "${searchTerm}"`);
             return;
         }
-
         addToCart(filteredProducts[0]._id);
         setSearchResults(filteredProducts);
         setSearchTerm('');
@@ -122,18 +130,17 @@ const Home = () => {
 
     const calcAmount = () => {
         const TONG_TIEN_SAN_PHAM = getTotalCartAmount();
-        const GIAM_GIA = TONG_TIEN_SAN_PHAM > 0 ? 1000 : 0;
-        const TONG_TIEN_SAU_GIAM_GIA = TONG_TIEN_SAN_PHAM - GIAM_GIA;
+        // const TONG_TIEN_SAN_PHAM = 100000;
+        const TONG_TIEN_SAU_GIAM_GIA = TONG_TIEN_SAN_PHAM - giamGia;
 
         setTongTien(TONG_TIEN_SAN_PHAM);
-        setGiamGia(GIAM_GIA);
         setTongTienSauGiamGia(TONG_TIEN_SAU_GIAM_GIA);
 
-        const TIEN_THUA_TRA_KHACH = KHACH_THANH_TOAN - TONG_TIEN_SAU_GIAM_GIA;
+        const TIEN_THUA_TRA_KHACH = khachThanhToan - TONG_TIEN_SAU_GIAM_GIA;
 
         if (TIEN_THUA_TRA_KHACH < 0) {
             setPaymentWarning(
-                `KHÁCH HÀNG CHƯA THANH TOÁN ĐỦ CÒN THIẾU ${formatCurrency(Math.abs(TIEN_THUA_TRA_KHACH))}`,
+                `KHÁCH HÀNG CHƯA THANH TOÁN ĐỦ, CÒN THIẾU ${formatCurrency(Math.abs(TIEN_THUA_TRA_KHACH))}`,
             );
             setTienThuaTraKhach(0);
         } else {
@@ -142,8 +149,54 @@ const Home = () => {
         }
     };
 
+    // ########### TEST #########
+    // Mảng mệnh giá tiền
+    const denominations = [1000, 2000, 5000, 10000, 20000, 50000, 100000, 200000, 500000];
+
+    const getSuggestions = (amount) => {
+        let suggestions = [];
+
+        // Nếu số tiền lớn hơn 500000, gợi ý các mệnh giá bắt đầu từ 500000 và theo quy tắc tăng dần
+        if (amount >= 500000) {
+            let nextAmount = 500000;
+            // Duyệt đến mệnh giá lớn hơn hoặc bằng amount
+            while (nextAmount < amount) {
+                nextAmount += 100000; // Tăng theo bội số 100000
+            }
+            // Thêm mệnh giá vào mảng gợi ý (tối thiểu là 500000, hoặc lớn hơn)
+            while (nextAmount <= amount || suggestions.length < 8) {
+                suggestions.push(nextAmount);
+                nextAmount += 100000; // Tăng thêm bội số 100000
+                if (suggestions.length >= 8) break; // Dừng lại khi đã có đủ 8 lựa chọn
+            }
+        } else {
+            // Mảng mệnh giá tiền nếu số tiền nhỏ hơn hoặc bằng 500000
+            suggestions = denominations.filter((denomination) => denomination >= amount);
+        }
+
+        if (!suggestions.includes(amount)) {
+            suggestions.unshift(amount);
+        }
+
+        // Đảm bảo rằng danh sách không vượt quá 8 lựa chọn
+        return suggestions.slice(0, 8);
+    };
+
+    const handleSuggestionClick2 = (amount) => {
+        setKhachThanhToan(amount);
+    };
+
+    const handleAmountChange = (event) => {
+        const value = parseInt(event.target.value, 10) || 0; // Đảm bảo giá trị luôn là số
+        setKhachThanhToan(value);
+    };
+
+    const suggestions2 = getSuggestions(khachThanhToan);
+    // ########### TEST #########
+
     return (
         <div className="sale-container">
+            {/* DANH SÁCH SẢN PHẨM VÀ GỢI Ý TÌM KIẾM SẢN PHẨM */}
             <div style={{ backgroundColor: 'lightblue' }}>
                 <form onSubmit={handleSearch} autoComplete="off">
                     <input
@@ -154,7 +207,9 @@ const Home = () => {
                         onChange={handleSearchChange}
                         autoFocus
                     />
-                    <button type="submit">Tìm kiếm</button>
+                    <button type="submit" className="sale-btn-tim-kiem">
+                        Tìm kiếm
+                    </button>
                 </form>
 
                 {/* Hiển thị danh sách gợi ý */}
@@ -273,7 +328,7 @@ const Home = () => {
                 )}
 
                 {error && <p style={{ color: 'red' }}>{error}</p>}
-                <div>
+                {/* <div>
                     {searchResults.map((product) => (
                         <div key={product._id}>
                             <h4>{product.name}</h4>
@@ -284,7 +339,7 @@ const Home = () => {
                             <img src={`${urlImage}${product.image}`} alt="image" />
                         </div>
                     ))}
-                </div>
+                </div> */}
 
                 <div>
                     {product_list.map(
@@ -292,12 +347,72 @@ const Home = () => {
                             cartItems[item._id] > 0 && (
                                 <div key={item._id} className="cart-container">
                                     <div className="cart-items-title cart-items-item">
-                                        <img src={`${urlImage}${item.image}`} alt={item.name} />
-                                        <p className="cart-items-name">{item.name}</p>
-                                        <p>{item.barcode}</p>
-                                        <p>{formatCurrency(item.sellingPrice)}</p>
-                                        <p className="quantity"> - {cartItems[item._id]} + </p>
-                                        <p>{formatCurrency(item.sellingPrice * cartItems[item._id])}</p>
+                                        <img
+                                            onClick={() => handleProductClick(item)}
+                                            title="Nhấn để xem chi tiết"
+                                            className="img-san-pham"
+                                            src={`${urlImage}${item.image}`}
+                                            alt={item.name}
+                                        />
+                                        <p
+                                            onClick={() => handleProductClick(item)} // Hiển thị popup khi nhấn vào tên
+                                            title="Nhấn để xem chi tiết"
+                                            className="cart-items-name"
+                                        >
+                                            {item.name}
+                                        </p>
+                                        <p title="Mã vạch sản phẩm">{item.barcode}</p>
+                                        <p title="Giá bán sản phẩm">{formatCurrency(item.sellingPrice)}</p>
+                                        {/* <p className="quantity"> - {cartItems[item._id]} + </p> */}
+                                        {/* <p className="quantity">
+                                            <img src={icons.remove_icon_red} alt="add icon" className="add" />
+                                            {cartItems[item._id]}
+                                            <img src={icons.add_icon_green} alt="add icon" className="add" />
+                                        </p> */}
+                                        {/* <img onClick={() => addToCart(id)} src={icon.add_icon_white} alt="add icon" className="add" /> */}
+                                        {/* START */}
+                                        <div className="product-item-counter">
+                                            <img
+                                                title="Xóa đi một sản phẩm"
+                                                onClick={() => removeFromCart(item._id)}
+                                                src={icons.remove_icon_red}
+                                                alt="icon xóa sản phẩm"
+                                            />
+                                            {/* <p>{cartItems[item._id]}</p> */}
+                                            <input
+                                                title="Nhập số lượng sản phẩm"
+                                                style={{
+                                                    textAlign: 'center',
+                                                    outline: 'none',
+                                                    border: 'none',
+                                                    maxWidth: '28px',
+                                                    marginLeft: '-8px',
+                                                    marginRight: '-8px',
+                                                    backgroundColor: 'inherit',
+                                                }}
+                                                type="text"
+                                                // value={cartItems[item._id]}
+                                                // onChange={(e) => {
+                                                //     // const value = parseInt(e.target.value, 10) || 0;
+                                                //     // setGiamGia(value);
+                                                // }}
+                                                value={cartItems[item._id] || 0} // Hiển thị số lượng hiện tại
+                                                onChange={(e) =>
+                                                    updateCartItemQuantity(item._id, parseInt(e.target.value, 10) || 0)
+                                                } // Gọi hàm cập nhật
+                                                maxLength={3}
+                                            />
+                                            <img
+                                                title="Thêm một sản phẩm"
+                                                onClick={() => addToCart(item._id)}
+                                                src={icons.add_icon_green}
+                                                alt="icon thêm sản phẩm"
+                                            />
+                                        </div>
+                                        {/* END */}
+                                        <p title="Giá sản phẩm (giá bán x số lượng)">
+                                            {formatCurrency(item.sellingPrice * cartItems[item._id])}
+                                        </p>
                                         {/* <p onClick={() => removeFromCart(item._id)} className="cross">
                                                 x
                                             </p> */}
@@ -306,13 +421,17 @@ const Home = () => {
                                 </div>
                             ),
                     )}
+
+                    {/* Popup chi tiết sản phẩm */}
+                    <ProductPopup product={selectedProduct} onClose={handleClosePopup} />
                 </div>
             </div>
 
+            {/* HÓA ĐƠN BÁN HÀNG */}
             <div style={{ height: '100%' }}>
                 <div className="cart-bottom">
                     <div className="cart-total">
-                        <h2>Tổng giỏ hàng</h2>
+                        <h2 style={{ textAlign: 'center' }}>Hóa đơn bán hàng</h2>
                         <div>
                             <div className="cart-total-details">
                                 <p>Tổng số lượng sản phẩm</p>
@@ -324,8 +443,18 @@ const Home = () => {
                             </div>
                             <hr />
                             <div className="cart-total-details">
-                                <p>Giảm giá</p>
-                                <p>{formatCurrency(giamGia)}</p>
+                                <label>Giảm giá:</label>
+                                <input
+                                    style={{ textAlign: 'right' }}
+                                    type="text"
+                                    value={giamGia}
+                                    onChange={(e) => {
+                                        const value = parseInt(e.target.value, 10) || 0; // Đảm bảo giá trị luôn là số
+                                        setGiamGia(value);
+                                    }}
+                                    placeholder="Nhập giảm giá"
+                                    maxLength={12}
+                                />
                             </div>
                             <hr />
                             <div className="cart-total-details">
@@ -334,28 +463,46 @@ const Home = () => {
                             </div>
                             <hr />
                             <div className="cart-total-details">
-                                <b>Khách thanh toán</b>
-                                <b>{formatCurrency(KHACH_THANH_TOAN)}</b>
+                                <label>Khách thanh toán:</label>
+                                <input
+                                    style={{ textAlign: 'right' }}
+                                    type="text"
+                                    value={khachThanhToan}
+                                    onChange={handleAmountChange}
+                                    placeholder="Nhập số tiền khách thanh toán"
+                                    maxLength={8}
+                                />
                             </div>
-                            <p style={{ color: 'red' }}>{paymentWarning}</p>
-
+                            {/* Gợi ý mệnh giá tiền */}
+                            <div style={{ minHeight: '145px', maxHeight: '145px' }}>
+                                <div style={{ display: 'flex', flexDirection: 'row' }}>
+                                    <div>
+                                        <h4>Gợi ý tiền khách trả</h4>
+                                        <div>
+                                            {suggestions2.map((suggestion, index) => (
+                                                <button
+                                                    key={index}
+                                                    onClick={() => handleSuggestionClick2(suggestion)}
+                                                    style={{ margin: '2px', maxWidth: '105px' }}
+                                                >
+                                                    {/* {suggestion.toLocaleString()} */}
+                                                    {formatCurrency(suggestion)}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    </div>
+                                </div>
+                                {/*  */}
+                                <p style={{ color: 'red' }}>{paymentWarning}</p>
+                            </div>
                             <hr />
-                            <div className="cart-total-details">
+                            <div className="cart-total-details" style={{ paddingTop: '50px' }}>
                                 <b>Tiền thừa trả khách</b>
                                 <b>{formatCurrency(tienThuaTraKhach)}</b>
                             </div>
                         </div>
-                        <button onClick={() => navigate('/dat-hang')}>MUA HÀNG</button>
+                        <button onClick={() => console.log('Mua hàng')}>THANH TOÁN</button>
                     </div>
-                    {/* <div className="cart-promocode">
-                        <div>
-                            <p>Nếu bạn có mã giảm giá, Nhập vào đây</p>
-                            <div className="cart-promocode-input">
-                                <input type="text" placeholder="Mã giảm giá" />
-                                <button>Áp dụng</button>
-                            </div>
-                        </div>
-                    </div> */}
                 </div>
             </div>
         </div>

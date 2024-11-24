@@ -30,6 +30,7 @@
     right: -50%;
     z-index: 1001;
     animation: slideInFromRight 0.5s forwards;
+    will-change: animation;
 }
 
 @keyframes slideInFromRight {
