@@ -312,10 +312,10 @@ const Sale = () => {
                                                             {suggestion.sellingPrice
                                                                 .toString()
                                                                 .substring(priceStartIndex + searchTerm.length)}{' '}
-                                                            VND
+                                                            ₫
                                                         </div>
                                                     ) : (
-                                                        <div>{suggestion.sellingPrice} VND</div>
+                                                        <div>{formatCurrency(suggestion.sellingPrice)}</div>
                                                     )}
                                                 </div>
                                             </div>
@@ -328,18 +328,6 @@ const Sale = () => {
                 )}
 
                 {error && <p style={{ color: 'red' }}>{error}</p>}
-                {/* <div>
-                    {searchResults.map((product) => (
-                        <div key={product._id}>
-                            <h4>{product.name}</h4>
-                            <p>Mã hàng: {product.productCode}</p>
-                            <p>Mã vạch: {product.barcode}</p>
-                            <p>Mô tả: {product.description}</p>
-                            <p>Giá bán: {product.sellingPrice} VND</p>
-                            <img src={`${urlImage}${product.image}`} alt="image" />
-                        </div>
-                    ))}
-                </div> */}
 
                 <div>
                     {product_list.map(

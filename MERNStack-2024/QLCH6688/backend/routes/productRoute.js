@@ -1,5 +1,11 @@
 import express from 'express';
-import { addProduct, listAllProducts, removeProduct, addBatchToProduct } from '../controllers/productController.js';
+import {
+    addProduct,
+    listAllProducts,
+    removeProduct,
+    addBatchToProduct,
+    getLastProductCode,
+} from '../controllers/productController.js';
 import multer from 'multer';
 
 const productRouter = express.Router();
@@ -25,5 +31,8 @@ productRouter.post('/xoasanpham', removeProduct);
 
 // Route nhập hàng (cập nhật lô hàng cho sản phẩm)
 productRouter.post('/nhaphang', addBatchToProduct);
+
+// Route nhập hàng (cập nhật lô hàng cho sản phẩm)
+productRouter.get('/lay-ma-san-pham-cuoi-cung', getLastProductCode);
 
 export default productRouter;

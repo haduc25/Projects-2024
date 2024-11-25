@@ -23,7 +23,6 @@ const productSchema = new mongoose.Schema({
         name: { type: String, required: true },
         contact: { type: String },
         address: { type: String },
-        email: { type: String },
     },
     image: { type: String }, // Hình ảnh
     createdAt: { type: Date, default: Date.now }, // Ngày tạo

@@ -12,7 +12,6 @@ const ChiTietSanPhamPopup = ({ setShowChiTietSanPham }) => {
     const [currState, setCurrState] = useState(DANG_NHAP);
     const [data, setData] = useState({
         name: '',
-        email: '',
         password: '',
     });
 
@@ -65,14 +64,6 @@ const ChiTietSanPhamPopup = ({ setShowChiTietSanPham }) => {
                             required
                         />
                     )}
-                    <input
-                        name="email"
-                        onChange={onChangeHandler}
-                        value={data.email}
-                        type="email"
-                        placeholder="Nhập email"
-                        required
-                    />
                     <input
                         name="password"
                         onChange={onChangeHandler}

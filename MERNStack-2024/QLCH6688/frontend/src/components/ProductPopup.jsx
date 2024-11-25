@@ -4,7 +4,7 @@ import { StoreContext } from '../context/StoreContext';
 
 const ProductPopup = ({ product, onClose }) => {
     const { urlImage, utilityFunctions } = useContext(StoreContext);
-    const { formatDate, formatCurrency } = utilityFunctions;
+    const { formatDateTimeFromISO8601ToVietNamDateTime, formatCurrency } = utilityFunctions;
 
     // State để kiểm tra xem giá nhập có hiển thị hay không
     const [isPriceVisible, setIsPriceVisible] = useState(false);
@@ -49,13 +49,16 @@ const ProductPopup = ({ product, onClose }) => {
                     <strong>Thương hiệu:</strong> {product.brand}
                 </p>
                 <p>
+                    <strong>Đơn vị tính:</strong> {product.unit}
+                </p>
+                <p>
                     <strong>Loại hàng:</strong> {product.category}
                 </p>
                 <p>
-                    <strong>Ngày nhập:</strong> {formatDate(product.createdAt)}
+                    <strong>Ngày nhập:</strong> {formatDateTimeFromISO8601ToVietNamDateTime(product.createdAt)}
                 </p>
                 <p>
-                    <strong>Lần cuối cập nhật:</strong> {formatDate(product.updatedAt)}
+                    <strong>Lần cuối cập nhật:</strong> {formatDateTimeFromISO8601ToVietNamDateTime(product.updatedAt)}
                 </p>
                 <div style={{ display: 'flex' }}>
                     <p style={{ marginRight: '12px' }}>
@@ -86,10 +89,6 @@ const ProductPopup = ({ product, onClose }) => {
                     <p>
                         <strong>Địa chỉ: </strong>
                         {product.supplier.address}
-                    </p>
-                    <p>
-                        <strong>Email: </strong>
-                        {product.supplier.email}
                     </p>
                 </div>
             </div>

@@ -4,6 +4,7 @@ import { StoreContext } from '../../context/StoreContext';
 import axios from 'axios';
 import * as XLSX from 'xlsx'; // Import thư viện xlsx
 import { saveAs } from 'file-saver'; // Import thư viện file-saver
+import { Link, useNavigate } from 'react-router-dom';
 
 const Products = () => {
     const { urlImage, product_list, utilityFunctions, fetchProductList } = useContext(StoreContext); // fetchProductList để làm mới danh sách sau khi xóa
@@ -120,7 +121,9 @@ const Products = () => {
         <div className="products">
             <h1>Danh sách sản phẩm</h1>
             <div className="action-buttons">
-                <button className="toggle-btn">Thêm sản sản phẩm mới</button>
+                <Link to="/san-pham/them-moi-san-pham" className="toggle-btn">
+                    Thêm sản sản phẩm mới
+                </Link>
                 <button className="toggle-btn" onClick={exportToExcel}>
                     Xuất file Excel
                 </button>

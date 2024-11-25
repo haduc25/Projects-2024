@@ -129,13 +129,12 @@ const StoreContextProvider = (props) => {
 
     // Global Functions
     const utilityFunctions = {
-        sum: (a, b) => a + b, // Hàm sum() đơn giản
         getTotalItems: () => Object.values(cartItems).reduce((sum, qty) => sum + qty, 0), // Tổng số lượng sản phẩm trong giỏ hàng
         calculateDiscount: (totalAmount, discountPercentage) => totalAmount * (1 - discountPercentage / 100), // Hàm tính giảm giá
         getCartItems: () => cartItems, // Trả về giỏ hàng hiện tại
         formatCurrency: (amount) =>
             new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount),
-        formatDate: (dateString) => {
+        formatDateTimeFromISO8601ToVietNamDateTime: (dateString) => {
             // Sửa lại cú pháp của hàm
             const date = new Date(dateString);
 
@@ -151,6 +150,13 @@ const StoreContextProvider = (props) => {
 
             // Trả về định dạng hh:mm:ss dd/mm/yyyy
             return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+        },
+        formatDateFromYYYYMMDDToVietNamDate: (dateString) => {
+            // Tách năm, tháng, ngày từ chuỗi 'yyyy/mm/dd'
+            const [year, month, day] = dateString.split('/');
+
+            // Trả về định dạng 'dd/mm/yyyy'
+            return `${day}/${month}/${year}`;
         },
     };
 
