@@ -1,7 +1,7 @@
 import axios from 'axios';
 import { createContext, useEffect, useState } from 'react';
 // import { product_list } from '../assets/assets_vn';
-import { products as product_list } from '../assets/products.js';
+// import { products as product_list } from '../assets/products.js';
 
 // Tạo Context: Context này sẽ giúp chia sẻ dữ liệu trong toàn bộ ứng dụng mà không cần phải truyền qua props từng cấp
 export const StoreContext = createContext(null);
@@ -18,7 +18,7 @@ const StoreContextProvider = (props) => {
     const urlImage = 'http://localhost:6868/images/';
     // const [token, setToken] = useState('');
     const [token, setToken] = useState('');
-    // const [product_list, setProductList] = useState([]);
+    const [product_list, setProductList] = useState([]);
 
     // ADD TO CART
     const addToCart = async (itemId) => {
@@ -101,7 +101,7 @@ const StoreContextProvider = (props) => {
     };
 
     const fetchFoodList = async () => {
-        const response = await axios.get(url + 'api/food/list');
+        const response = await axios.get(url + 'api/sanpham/danhsachsanpham');
         setProductList(response.data.data);
     };
 
@@ -116,16 +116,16 @@ const StoreContextProvider = (props) => {
     // }, [cartItems]);
 
     // get data from local storage
-    // useEffect(() => {
-    //     async function loadData() {
-    //         await fetchFoodList();
-    //         if (localStorage.getItem('token')) {
-    //             setToken(localStorage.getItem('token'));
-    //             await loadCartData(localStorage.getItem('token'));
-    //         }
-    //     }
-    //     loadData();
-    // }, []);
+    useEffect(() => {
+        async function loadData() {
+            await fetchFoodList();
+            // if (localStorage.getItem('token')) {
+            //     setToken(localStorage.getItem('token'));
+            //     await loadCartData(localStorage.getItem('token'));
+            // }
+        }
+        loadData();
+    }, []);
 
     // Global Functions
     const utilityFunctions = {
@@ -152,11 +152,33 @@ const StoreContextProvider = (props) => {
             return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
         },
         formatDateFromYYYYMMDDToVietNamDate: (dateString) => {
-            // Tách năm, tháng, ngày từ chuỗi 'yyyy/mm/dd'
-            const [year, month, day] = dateString.split('/');
+            // Tạo đối tượng Date từ chuỗi theo định dạng 'YYYY-MM-DD'
+            const date = new Date(dateString);
 
-            // Trả về định dạng 'dd/mm/yyyy'
+            // Lấy ngày, tháng, năm
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+            const year = date.getFullYear();
+
+            // Trả về định dạng dd/mm/yyyy
             return `${day}/${month}/${year}`;
+        },
+        convertCategory: (category) => {
+            const categoryMap = {
+                dientu: 'Điện tử',
+                thoitrang: 'Thời trang',
+                giadung: 'Gia dụng',
+                thucpham: 'Thực phẩm',
+                mypham: 'Mỹ phẩm',
+                thuocla: 'Thuốc lá',
+                sua: 'Sữa',
+                keocaosu: 'Kẹo cao su',
+                nuocngot: 'Nước ngọt',
+                thucphamanlien: 'Thực phẩm ăn liền',
+                caphe: 'Cà phê',
+            };
+
+            return categoryMap[category.toLowerCase()] || category;
         },
     };
 

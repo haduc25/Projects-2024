@@ -1,14 +1,24 @@
 import axios from 'axios';
 import { createContext, useEffect, useState } from 'react';
+// import { product_list } from '../assets/assets_vn';
 import { products as product_list } from '../assets/products.js';
 
+// Tạo Context: Context này sẽ giúp chia sẻ dữ liệu trong toàn bộ ứng dụng mà không cần phải truyền qua props từng cấp
 export const StoreContext = createContext(null);
 
+/** StoreContextProvider Component
+ * StoreContextProvider là một component bao bọc (wrapper) được sử dụng để cung cấp giá trị của product_list cho các component con thông qua Context.
+ * contextValue: Được khởi tạo với product_list, đây chính là giá trị sẽ được truyền tới các component con.
+ * StoreContext.Provider: Sử dụng Provider để cung cấp contextValue cho tất cả các component con bên trong ({props.children}).
+ */
 const StoreContextProvider = (props) => {
     const [cartItems, setCartItems] = useState({});
+    // backend url
     const url = 'http://localhost:6868/';
     const urlImage = 'http://localhost:6868/images/';
+    // const [token, setToken] = useState('');
     const [token, setToken] = useState('');
+    // const [product_list, setProductList] = useState([]);
 
     // ADD TO CART
     const addToCart = async (itemId) => {
@@ -90,14 +100,64 @@ const StoreContextProvider = (props) => {
         return totalQuantity;
     };
 
+    const fetchFoodList = async () => {
+        const response = await axios.get(url + 'api/food/list');
+        setProductList(response.data.data);
+    };
+
+    const loadCartData = async (token) => {
+        const response = await axios.post(url + 'api/cart/get', {}, { headers: { token } });
+        setCartItems(response.data.cartData);
+    };
+
+    // Test
+    // useEffect(() => {
+    //     console.log('cartItems: ', cartItems);
+    // }, [cartItems]);
+
+    // get data from local storage
+    // useEffect(() => {
+    //     async function loadData() {
+    //         await fetchFoodList();
+    //         if (localStorage.getItem('token')) {
+    //             setToken(localStorage.getItem('token'));
+    //             await loadCartData(localStorage.getItem('token'));
+    //         }
+    //     }
+    //     loadData();
+    // }, []);
+
     // Global Functions
     const utilityFunctions = {
-        sum: (a, b) => a + b, // Hàm sum() đơn giản
         getTotalItems: () => Object.values(cartItems).reduce((sum, qty) => sum + qty, 0), // Tổng số lượng sản phẩm trong giỏ hàng
         calculateDiscount: (totalAmount, discountPercentage) => totalAmount * (1 - discountPercentage / 100), // Hàm tính giảm giá
         getCartItems: () => cartItems, // Trả về giỏ hàng hiện tại
         formatCurrency: (amount) =>
             new Intl.NumberFormat('vi-VN', { style: 'currency', currency: 'VND' }).format(amount),
+        formatDateTimeFromISO8601ToVietNamDateTime: (dateString) => {
+            // Sửa lại cú pháp của hàm
+            const date = new Date(dateString);
+
+            // Lấy giờ, phút, giây
+            const hours = String(date.getHours()).padStart(2, '0');
+            const minutes = String(date.getMinutes()).padStart(2, '0');
+            const seconds = String(date.getSeconds()).padStart(2, '0');
+
+            // Lấy ngày, tháng, năm
+            const day = String(date.getDate()).padStart(2, '0');
+            const month = String(date.getMonth() + 1).padStart(2, '0'); // Tháng bắt đầu từ 0
+            const year = date.getFullYear();
+
+            // Trả về định dạng hh:mm:ss dd/mm/yyyy
+            return `${hours}:${minutes}:${seconds} ${day}/${month}/${year}`;
+        },
+        formatDateFromYYYYMMDDToVietNamDate: (dateString) => {
+            // Tách năm, tháng, ngày từ chuỗi 'yyyy/mm/dd'
+            const [year, month, day] = dateString.split('/');
+
+            // Trả về định dạng 'dd/mm/yyyy'
+            return `${day}/${month}/${year}`;
+        },
     };
 
     const contextValue = {

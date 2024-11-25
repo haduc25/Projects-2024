@@ -4,7 +4,12 @@ import { StoreContext } from '../context/StoreContext';
 
 const ProductPopup = ({ product, onClose }) => {
     const { urlImage, utilityFunctions } = useContext(StoreContext);
-    const { formatDateTimeFromISO8601ToVietNamDateTime, formatCurrency } = utilityFunctions;
+    const {
+        formatDateTimeFromISO8601ToVietNamDateTime,
+        formatDateFromYYYYMMDDToVietNamDate,
+        formatCurrency,
+        convertCategory,
+    } = utilityFunctions;
 
     // State để kiểm tra xem giá nhập có hiển thị hay không
     const [isPriceVisible, setIsPriceVisible] = useState(false);
@@ -20,6 +25,7 @@ const ProductPopup = ({ product, onClose }) => {
     const togglePriceVisibility = () => {
         setIsPriceVisible(!isPriceVisible);
     };
+    console.log(product);
 
     return (
         <div className="popup-overlay" onClick={handleOverlayClick}>
@@ -52,7 +58,7 @@ const ProductPopup = ({ product, onClose }) => {
                     <strong>Đơn vị tính:</strong> {product.unit}
                 </p>
                 <p>
-                    <strong>Loại hàng:</strong> {product.category}
+                    <strong>Loại hàng:</strong> {convertCategory(product.category)}
                 </p>
                 <p>
                     <strong>Ngày nhập:</strong> {formatDateTimeFromISO8601ToVietNamDateTime(product.createdAt)}
@@ -77,7 +83,8 @@ const ProductPopup = ({ product, onClose }) => {
                 </p>
 
                 <div>
-                    <h4 style={{ textAlign: 'center' }}>Nhà phân phối</h4>
+                    <h4 style={{ textAlign: 'center' }}>Thông tin nhập hàng</h4>
+
                     <p>
                         <strong>Nhà phân phối: </strong>
                         {product.supplier.name}
@@ -90,6 +97,28 @@ const ProductPopup = ({ product, onClose }) => {
                         <strong>Địa chỉ: </strong>
                         {product.supplier.address}
                     </p>
+
+                    {product.batches && product.batches.length > 0 ? (
+                        product.batches.map((batch, index) => (
+                            <div key={index}>
+                                <p>
+                                    <strong>Số lô {index + 1}: </strong> {batch.batchNumber}
+                                </p>
+                                <p>
+                                    <strong>Ngày nhập: </strong> {formatDateFromYYYYMMDDToVietNamDate(batch.entryDate)}
+                                </p>
+                                <p>
+                                    <strong>Hạn sử dụng: </strong>{' '}
+                                    {formatDateFromYYYYMMDDToVietNamDate(batch.expirationDate)}
+                                </p>
+                                <p>
+                                    <strong>Số lượng: </strong> {batch.quantity}
+                                </p>
+                            </div>
+                        ))
+                    ) : (
+                        <p>Chưa có thông tin về các lô hàng.</p>
+                    )}
                 </div>
             </div>
         </div>

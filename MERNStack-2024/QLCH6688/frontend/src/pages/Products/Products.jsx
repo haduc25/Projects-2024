@@ -8,7 +8,7 @@ import { Link, useNavigate } from 'react-router-dom';
 
 const Products = () => {
     const { urlImage, product_list, utilityFunctions, fetchProductList } = useContext(StoreContext); // fetchProductList để làm mới danh sách sau khi xóa
-    const { formatCurrency } = utilityFunctions;
+    const { formatCurrency, convertCategory } = utilityFunctions;
 
     const [products, setProducts] = useState([]);
     const [visiblePrices, setVisiblePrices] = useState({}); // Quản lý trạng thái hiển thị giá nhập
@@ -89,7 +89,7 @@ const Products = () => {
             'Mã sản phẩm': product.productCode,
             'Mã vạch': product.barcode,
             'Tên sản phẩm': product.name,
-            'Danh mục': product.category,
+            'Nhóm hàng': product.category,
             'Giá nhập': product.purchasePrice,
             'Giá bán': product.sellingPrice,
             'Tồn kho': product.stock,
@@ -137,7 +137,7 @@ const Products = () => {
                         <th>Hình ảnh</th>
                         <th>Mã sản phẩm</th>
                         <th>Tên sản phẩm</th>
-                        <th>Danh mục</th>
+                        <th>Nhóm hàng</th>
                         <th>Giá nhập</th>
                         <th>Giá bán</th>
                         <th>Tồn kho</th>
@@ -157,7 +157,7 @@ const Products = () => {
                                 </td>
                                 <td>{product.productCode}</td>
                                 <td>{product.name}</td>
-                                <td>{product.category}</td>
+                                <td>{convertCategory(product.category)}</td>
                                 {/* <td
                                     className="price-cell"
                                     onClick={() => togglePriceVisibility(product._id)}
