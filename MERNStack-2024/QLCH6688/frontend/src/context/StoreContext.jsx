@@ -180,6 +180,42 @@ const StoreContextProvider = (props) => {
 
             return categoryMap[category.toLowerCase()] || category;
         },
+        removeSpecialChars: (input, key) => {
+            const specialChars = '!@#$%^&*()_+={}[]|\\:;"\'<>,.?/~`-';
+            // Nếu trường là 'name', không loại bỏ dấu ( và )
+            if (key === 'name') {
+                return input
+                    .split('')
+                    .filter(
+                        (char) =>
+                            !specialChars.includes(char) ||
+                            char === '(' ||
+                            char === ')' ||
+                            char === '-' ||
+                            char === ',',
+                    )
+                    .join('');
+            }
+            // Nếu trường là 'unit'
+            if (key === 'unit') {
+                return input
+                    .split('')
+                    .filter((char) => !specialChars.includes(char) || char === ',')
+                    .join('');
+            }
+            // Nếu trường là 'purchasePrice', chỉ chấp nhận số
+            // if (key === 'purchasePrice') {
+            //     return input
+            //         .split('')
+            //         .filter((char) => !isNaN(char) && char !== ' ') // Chỉ giữ số
+            //         .join('');
+            // }
+            // Nếu không phải là 'name', 'unit', hay 'purchasePrice', loại bỏ tất cả các ký tự đặc biệt
+            return input
+                .split('')
+                .filter((char) => !specialChars.includes(char))
+                .join('');
+        },
     };
 
     const contextValue = {
