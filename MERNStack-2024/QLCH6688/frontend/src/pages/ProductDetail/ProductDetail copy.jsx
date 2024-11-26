@@ -1,31 +1,16 @@
 import { useState, useEffect, useContext, useRef } from 'react';
-import './AddProduct.css';
+import { useParams } from 'react-router-dom';
 import axios from 'axios';
 import { StoreContext } from '../../context/StoreContext';
+import './ProductDetail.css';
 import { Link, useNavigate } from 'react-router-dom';
 
-const AddProduct = () => {
-    const { url } = useContext(StoreContext);
-
-    const [product, setProduct] = useState({
-        productCode: '',
-        barcode: '',
-        name: '',
-        category: '',
-        brand: '',
-        purchasePrice: '',
-        sellingPrice: '',
-        unit: '',
-        stock: '',
-        description: '',
-        notes: '',
-        supplier: {
-            name: '',
-            contact: '',
-            address: '',
-        },
-        batches: [],
-    });
+const ProductDetail = () => {
+    const { urlImage, url, product_list, utilityFunctions } = useContext(StoreContext); // fetchProductList để làm mới danh sách sau khi xóa
+    const { formatCurrency, convertCategory } = utilityFunctions;
+    const { id } = useParams(); // Lấy `id` từ URL
+    const [product, setProduct] = useState(null);
+    const [isEditingCode, setIsEditingCode] = useState(false); // State kiểm soát chế độ chỉnh sửa mã sản phẩm
     const [image, setImage] = useState(null);
     const [batch, setBatch] = useState({
         entryDate: '',
@@ -33,192 +18,25 @@ const AddProduct = () => {
         purchasePrice: '',
         quantity: '',
     });
-    const fileInputRef = useRef(null);
 
-    const fetchLastProductCode = async () => {
-        try {
-            // Gọi API lấy mã sản phẩm cuối
-            const response = await axios.get(`${url}api/sanpham/laymasanphamcuoicung`);
-            const lastCode = response.data.lastCode || 'SP000000'; // Nếu không có sản phẩm nào, bắt đầu từ SP000000
-            const newCode = `SP${(parseInt(lastCode.slice(2)) + 1).toString().padStart(6, '0')}`; // Tăng mã sản phẩm
-            setProduct((prev) => ({ ...prev, productCode: newCode })); // Cập nhật mã sản phẩm mới
-            // console.log('response: ', response);
-            // console.log('lastCode: ', lastCode);
-            // console.log('newCode: ', newCode);
-        } catch (error) {
-            console.error('Lỗi lấy mã sản phẩm cuối:', error);
-            alert('Không thể lấy mã sản phẩm cuối!');
-        }
-    };
-
-    // Fetch mã sản phẩm tự động
     useEffect(() => {
-        fetchLastProductCode();
-    }, []);
-
-    const [isEditingCode, setIsEditingCode] = useState(false); // State kiểm soát chế độ chỉnh sửa mã sản phẩm
-
-    const handleChange = (e, field) => {
-        const { name, value } = e.target;
-        const key = field || name; // Sử dụng `field` nếu được cung cấp, nếu không thì sử dụng `name`
-
-        // Hàm loại bỏ ký tự đặc biệt
-        const removeSpecialChars = (input, key) => {
-            const specialChars = '!@#$%^&*()_+={}[]|\\:;"\'<>,.?/~`-';
-            // Nếu trường là 'name', không loại bỏ dấu ( và )
-            if (key === 'name') {
-                return input
-                    .split('')
-                    .filter(
-                        (char) =>
-                            !specialChars.includes(char) ||
-                            char === '(' ||
-                            char === ')' ||
-                            char === '-' ||
-                            char === ',',
-                    )
-                    .join('');
+        const fetchProductDetail = async () => {
+            try {
+                const response = await axios.get(`${url}api/sanpham/chitietsanpham/${id}`);
+                setProduct(response.data);
+                console.log('response.data: ', response.data); // Kiểm tra dữ liệu trả về
+            } catch (error) {
+                console.error('Lỗi khi tải chi tiết sản phẩm:', error);
             }
-            // Nếu trường là 'unit'
-            if (key === 'unit') {
-                return input
-                    .split('')
-                    .filter((char) => !specialChars.includes(char) || char === ',')
-                    .join('');
-            }
-            // Nếu không phải là 'name', loại bỏ tất cả các ký tự đặc biệt
-            return input
-                .split('')
-                .filter((char) => !specialChars.includes(char))
-                .join('');
         };
+        fetchProductDetail();
+    }, [id]);
 
-        // Validate cho từng trường
-        const validateField = (key, sanitizedValue) => {
-            switch (key) {
-                case 'productCode':
-                    if (sanitizedValue.length > 8) {
-                        alert('Mã sản phẩm không hợp lệ! Định dạng: SPXXXXXX (6 chữ số).');
-                        return null;
-                    }
-                    break;
-                case 'barcode': {
-                    // Kiểm tra mã vạch chỉ bao gồm số
-                    if (!/^\d*$/.test(sanitizedValue)) {
-                        alert('Mã vạch chỉ được chứa số.');
-                        return null;
-                    }
-                    // Kiểm tra độ dài tối đa của mã vạch
-                    if (sanitizedValue.length > 13) {
-                        alert('Mã vạch không được vượt quá 13 ký tự.');
-                        return null;
-                    }
-                    break;
-                }
-                case 'name':
-                    if (sanitizedValue.length > 50) {
-                        alert('Tên sản phẩm không được dài hơn 50 ký tự.');
-                        return null;
-                    }
-                    break;
-
-                case 'brand':
-                    if (sanitizedValue.length > 30) {
-                        alert('Thương hiệu không được dài hơn 30 ký tự.');
-                        return null;
-                    }
-                    break;
-
-                case 'description':
-                    if (sanitizedValue.length > 200) {
-                        alert('Mô tả không được dài hơn 200 ký tự.');
-                        return null;
-                    }
-                    break;
-
-                case 'notes':
-                    if (sanitizedValue.length > 100) {
-                        alert('Ghi chú không được dài hơn 100 ký tự.');
-                        return null;
-                    }
-                    break;
-
-                case 'purchasePrice':
-                    if (sanitizedValue.length > 10) {
-                        alert('Giá nhập không được dài hơn 10 ký tự.');
-                        return null;
-                    }
-                    break;
-
-                case 'sellingPrice':
-                    if (sanitizedValue.length > 10) {
-                        alert('Giá bán không được dài hơn 10 ký tự.');
-                        return null;
-                    }
-                    break;
-
-                case 'stock':
-                    if (sanitizedValue.length > 5) {
-                        alert('Số lượng tồn không được dài hơn 5 ký tự.');
-                        return null;
-                    }
-                    break;
-                default:
-                    break;
-            }
-            return sanitizedValue; // Trả về giá trị đã lọc
-        };
-
-        // Lọc ký tự đặc biệt
-        const sanitizedValue = removeSpecialChars(value, key);
-
-        // Validate giá trị
-        const validValue = validateField(key, sanitizedValue);
-        if (validValue === null) return; // Dừng nếu không hợp lệ
-
-        // Cập nhật state với giá trị đã được làm sạch và hợp lệ
-        if (key.startsWith('supplier.')) {
-            const supplierKey = key.split('.')[1];
-            setProduct((prev) => ({
-                ...prev,
-                supplier: { ...prev.supplier, [supplierKey]: validValue },
-            }));
-        } else {
-            setProduct((prev) => ({
-                ...prev,
-                [key]: validValue,
-            }));
-        }
-    };
-
-    const handleImageChange = (e) => {
-        setImage(e.target.files[0]);
-    };
-
-    // Xử lý khi nhập thông tin lô hàng
-    const handleBatchChange = (e) => {
-        const { name, value } = e.target;
-        setBatch((prev) => ({
-            ...prev,
-            [name]: value,
-        }));
-    };
-
-    // Thêm lô hàng vào danh sách
-    const addBatch = () => {
-        if (!batch.entryDate || !batch.expirationDate || !batch.purchasePrice || !batch.quantity) {
-            alert('Vui lòng điền đầy đủ thông tin lô hàng!');
-            return;
-        }
-        setProduct((prev) => ({
-            ...prev,
-            batches: [...prev.batches, batch],
-        }));
-        setBatch({ entryDate: '', expirationDate: '', purchasePrice: '', quantity: '' });
-    };
-
-    // Gửi dữ liệu tới backend
-    const handleSubmit = async (e) => {
+    if (!product) {
+        return <div>Đang tải thông tin sản phẩm...</div>;
+    }
+    // console.log('Product: ' + product);
+    const handleUpdate = async (e) => {
         e.preventDefault();
 
         // Kiểm tra dữ liệu trước khi gửi
@@ -234,7 +52,6 @@ const AddProduct = () => {
             alert('Vui lòng nhập tên nhà cung cấp!');
             return;
         }
-        console.log('product.supplier.name.trim(): ', product.supplier.name.trim());
         if (product.batches.length === 0) {
             alert('Vui lòng thêm ít nhất một lô hàng!');
             return;
@@ -254,54 +71,82 @@ const AddProduct = () => {
             }
         }
 
-        // Console log dữ liệu trong FormData
+        // Log FormData để kiểm tra dữ liệu
         console.log('FormData');
         formData.forEach((value, key) => {
             console.log(`${key}: ${value}`);
         });
-        console.log('product: ', product);
 
+        // Nếu có ảnh mới thì thêm vào FormData
         if (image) formData.append('image', image);
 
         try {
-            const response = await axios.post(`${url}api/sanpham/themsanpham`, formData, {
+            // Gửi yêu cầu PUT để cập nhật sản phẩm
+            const response = await axios.put(`${url}api/sanpham/capnhatsanpham/${id}`, formData, {
                 headers: {
                     'Content-Type': 'multipart/form-data',
                 },
             });
 
-            // Thông báo và reset form sau khi thành công
-            alert('Thêm sản phẩm thành công!');
+            // Thông báo thành công và reset form
+            alert('Cập nhật sản phẩm thành công!');
             console.log('Phản hồi từ server:', response.data);
 
+            // Reset lại form sau khi cập nhật
             setProduct({
-                productCode: '',
-                barcode: '',
-                name: '',
-                category: '',
-                brand: '',
-                purchasePrice: '',
-                sellingPrice: '',
-                unit: '',
-                stock: '',
-                description: '',
-                notes: '',
-                supplier: {
-                    name: '',
-                    contact: '',
-                    address: '',
-                },
-                batches: [],
+                productCode: product.productCode, // Giữ mã sản phẩm cũ khi cập nhật
+                barcode: product.barcode,
+                name: product.name,
+                category: product.category,
+                brand: product.brand,
+                purchasePrice: product.purchasePrice,
+                sellingPrice: product.sellingPrice,
+                unit: product.unit,
+                stock: product.stock,
+                description: product.description,
+                notes: product.notes,
+                supplier: { ...product.supplier },
+                batches: product.batches,
             });
             setImage(null);
-            if (fileInputRef.current) fileInputRef.current.value = '';
-            fetchLastProductCode();
+
+            // Reset input file nếu có
+            // if (fileInputRef.current) fileInputRef.current.value = '';
+
+            // Nếu cần, làm mới danh sách sản phẩm sau khi cập nhật
+            // fetchProductList();
         } catch (error) {
-            // Hiển thị chi tiết lỗi
-            console.error('Lỗi khi thêm sản phẩm:', error.response?.data || error.message);
-            alert(`Thêm sản phẩm thất bại! Lỗi: ${error.response?.data?.message || error.message}`);
+            // Xử lý lỗi nếu có
+            console.error('Lỗi khi cập nhật sản phẩm:', error.response?.data || error.message);
+            alert(`Cập nhật sản phẩm thất bại! Lỗi: ${error.response?.data?.message || error.message}`);
         }
     };
+
+    const addBatch = () => {};
+    const handleBatchChange = () => {};
+    const handleImageChange = (event) => {
+        const file = event.target.files[0];
+        if (file) {
+            // Giả sử bạn sẽ tải ảnh lên server và lấy URL ảnh mới
+            const formData = new FormData();
+            formData.append('image', file);
+
+            axios
+                .post(`${url}api/sanpham/upload-image`, formData)
+                .then((response) => {
+                    // Cập nhật ảnh mới cho sản phẩm
+                    setProduct((prevProduct) => ({
+                        ...prevProduct,
+                        imageUrl: response.data.imageUrl, // Giả sử server trả về URL ảnh mới
+                    }));
+                })
+                .catch((error) => {
+                    console.error('Lỗi khi tải ảnh lên:', error);
+                });
+        }
+    };
+
+    // const fileInputRef = useRef(null);
 
     return (
         <div className="add-product">
@@ -310,8 +155,8 @@ const AddProduct = () => {
                     Quay lại
                 </Link>
             </div>
-            <h1>Thêm Sản Phẩm</h1>
-            <form onSubmit={handleSubmit}>
+            <h1>Chi tiết sản phẩm</h1>
+            <form onSubmit={handleUpdate}>
                 <div className="form-group">
                     <div style={{ display: 'flex', justifyContent: 'space-between' }}>
                         <label>Mã sản phẩm ({isEditingCode ? 'tự chỉnh' : 'tự động'}):</label>
@@ -328,7 +173,7 @@ const AddProduct = () => {
                                         ) {
                                             return; // Dừng lại nếu người dùng chọn "Hủy"
                                         }
-                                        fetchLastProductCode(); // Gọi hàm tạo mã tự động nếu người dùng đồng ý
+                                        // fetchLastProductCode(); // Gọi hàm tạo mã tự động nếu người dùng đồng ý
                                     }}
                                     style={{
                                         textDecoration: 'none',
@@ -390,33 +235,6 @@ const AddProduct = () => {
                         onChange={(e) => handleChange(e, 'name')}
                         required
                     />
-                </div>
-                <div className="form-group">
-                    <label>Nhóm hàng:</label>
-                    <select
-                        name="category"
-                        value={product.category}
-                        onChange={(e) => handleChange(e)}
-                        style={{
-                            padding: '5px',
-                            border: '1px solid #ccc',
-                            borderRadius: '5px',
-                            width: '100%',
-                        }}
-                    >
-                        <option value="">-- Chọn nhóm hàng cho sản phẩm --</option>
-                        <option value="dientu">Điện tử</option>
-                        <option value="thoitrang">Thời trang</option>
-                        <option value="giadung">Gia dụng</option>
-                        <option value="thucpham">Thực phẩm</option>
-                        <option value="mypham">Mỹ phẩm</option>
-                        <option value="thuocla">Thuốc lá</option>
-                        <option value="sua">Sữa</option>
-                        <option value="keocaosu">Kẹo cao su</option>
-                        <option value="nuocngot">Nước ngọt</option>
-                        <option value="thucphamanlien">Thực phẩm ăn liền</option>
-                        <option value="caphe">Cà phê</option>
-                    </select>
                 </div>
                 <div className="form-group">
                     <label>Nhóm hàng:</label>
@@ -567,15 +385,32 @@ const AddProduct = () => {
                 </ul>
                 <div className="form-group">
                     <label>Ảnh sản phẩm:</label>
-                    <input type="file" ref={fileInputRef} onChange={handleImageChange} />
+                    {product.image && (
+                        <div>
+                            <img
+                                src={`${urlImage}${product.image}`}
+                                alt="Ảnh sản phẩm"
+                                style={{ maxWidth: '200px', maxHeight: '200px' }}
+                            />
+                        </div>
+                    )}
+                </div>
+
+                <div className="form-group">
+                    <label>Ảnh sản phẩm:</label>
+                    {/* <input type="file" ref={fileInputRef} onChange={handleImageChange} /> */}
+                </div>
+                <div className="form-group">
+                    <label>Chỉnh sửa ảnh sản phẩm:</label>
+                    <input type="file" onChange={handleImageChange} />
                 </div>
 
                 <button type="submit" className="submit-btn">
-                    Thêm sản phẩm
+                    Lưu & cập nhật
                 </button>
             </form>
         </div>
     );
 };
 
-export default AddProduct;
+export default ProductDetail;

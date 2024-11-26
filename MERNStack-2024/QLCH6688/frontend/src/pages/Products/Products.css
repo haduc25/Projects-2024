@@ -33,18 +33,8 @@
     border-radius: 5px;
 }
 
-.edit-btn {
+.detail-btn {
     background-color: #4caf50;
-    color: white;
-    border: none;
-    padding: 5px 10px;
-    margin-right: 5px;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
-.batch-btn {
-    background-color: #2196f3;
     color: white;
     border: none;
     padding: 5px 10px;
@@ -67,6 +57,7 @@ button:hover {
 }
 
 .action-buttons {
+    position: relative;
     display: flex;
     justify-content: flex-end; /* Căn nút về bên phải */
     gap: 10px; /* Khoảng cách giữa các nút */
@@ -81,6 +72,7 @@ button:hover {
     border-radius: 5px;
     cursor: pointer;
     font-weight: bold;
+    font-size: 14px;
     white-space: nowrap; /* Giữ text trên một dòng */
 }
 

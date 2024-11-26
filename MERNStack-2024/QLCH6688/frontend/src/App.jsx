@@ -5,6 +5,7 @@ import Sale from './pages/Sale/Sale';
 import Products from './pages/Products/Products';
 import AddProduct from './pages/AddProduct/AddProduct';
 import Navbar from './components/Navbar/Navbar';
+import ProductDetail from './pages/ProductDetail/ProductDetail';
 import ChiTietSanPhamPopup from './components/ChiTietSanPhamPopup';
 
 const App = () => {
@@ -20,10 +21,10 @@ const App = () => {
                 <Navbar />
                 <Routes>
                     <Route path="/" element={<Home />} />
-                    <Route path="/ban-hang" element={<Sale />} />
-                    <Route path="/san-pham" element={<Products />} />
-                    <Route path="/san-pham/them-moi-san-pham" element={<AddProduct />} />
-                    {/* <Route path="/verify" element={<Verify />} /> */}
+                    <Route path="/banhang" element={<Sale />} />
+                    <Route path="/sanpham" element={<Products />} />
+                    <Route path="/sanpham/themmoisanpham" element={<AddProduct />} />
+                    <Route path="/sanpham/chitietsanpham/:id" element={<ProductDetail />} />
                     {/* <Route path="/myorders" element={<MyOrders />} /> */}
                 </Routes>
             </div>

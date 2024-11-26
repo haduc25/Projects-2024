@@ -23,7 +23,7 @@ const Navbar = () => {
                 <Link to="/" onClick={() => setMenu('home')} className={menu === 'home' ? 'active' : ''}>
                     Trang chủ
                 </Link>
-                <Link to="/san-pham" onClick={() => setMenu('menu')} className={menu === 'menu' ? 'active' : ''}>
+                <Link to="/sanpham" onClick={() => setMenu('menu')} className={menu === 'menu' ? 'active' : ''}>
                     Hàng hóa
                 </Link>
                 <a href="#explore-menu2" onClick={() => setMenu('menu2')} className={menu === 'menu2' ? 'active' : ''}>
@@ -37,7 +37,7 @@ const Navbar = () => {
                     Doanh thu
                 </a>
                 <Link
-                    to="/ban-hang"
+                    to="/banhang"
                     onClick={() => setMenu('contact-us')}
                     className={menu === 'contact-us' ? 'active' : ''}
                 >

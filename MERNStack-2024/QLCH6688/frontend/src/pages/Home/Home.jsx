@@ -8,11 +8,11 @@ const Home = () => {
             <p>Home</p>
             <hr />
             <h3>
-                <Link to="/ban-hang">Bán hàng</Link>
+                <Link to="/banhang">Bán hàng</Link>
             </h3>
             <hr />
             <h3>
-                <Link to="/san-pham">Sản phẩm</Link>
+                <Link to="/sanpham">Sản phẩm</Link>
             </h3>
             <hr />
         </div>

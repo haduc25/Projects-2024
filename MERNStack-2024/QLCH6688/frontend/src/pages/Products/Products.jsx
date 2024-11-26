@@ -13,6 +13,7 @@ const Products = () => {
     const [products, setProducts] = useState([]);
     const [visiblePrices, setVisiblePrices] = useState({}); // Quản lý trạng thái hiển thị giá nhập
     const [showAllPrices, setShowAllPrices] = useState(false); // Quản lý trạng thái toggle toàn bộ giá nhập
+    const navigate = useNavigate();
 
     useEffect(() => {
         setProducts(product_list); // Cập nhật danh sách sản phẩm từ context
@@ -44,32 +45,10 @@ const Products = () => {
         }));
     };
 
-    // Hàm xử lý xóa sản phẩm
-    const handleDelete = async (productId) => {
-        if (window.confirm('Bạn có chắc chắn muốn xóa sản phẩm này không?')) {
-            try {
-                await axios.post('/api/remove-product', { id: productId });
-                alert('Xóa sản phẩm thành công!');
-                fetchProductList(); // Làm mới danh sách sản phẩm
-            } catch (error) {
-                console.error('Lỗi xóa sản phẩm:', error);
-                alert('Xóa sản phẩm thất bại!');
-            }
-        }
-    };
-
     // Hàm xử lý chỉnh sửa sản phẩm
-    const handleEdit = (product) => {
-        alert(`Chỉnh sửa sản phẩm: ${product.name}`);
-        // Thực hiện điều hướng tới trang chỉnh sửa (nếu có router)
-        // navigate(`/edit-product/${product._id}`);
-    };
-
-    // Hàm xử lý nhập hàng
-    const handleAddBatch = (product) => {
-        alert(`Nhập hàng cho sản phẩm: ${product.name}`);
-        // Thực hiện điều hướng tới trang nhập hàng (nếu có router)
-        // navigate(`/add-batch/${product._id}`);
+    const handleDetail = (product) => {
+        // alert(`Xem chi tiết sản phẩm: ${product.name} ${product.barcode} ${product._id}`);
+        navigate(`/sanpham/chitietsanpham/${product._id}`);
     };
 
     const exportToExcel = () => {
@@ -121,11 +100,12 @@ const Products = () => {
         <div className="products">
             <h1>Danh sách sản phẩm</h1>
             <div className="action-buttons">
-                <Link to="/san-pham/them-moi-san-pham" className="toggle-btn">
+                <p style={{ position: 'absolute', top: '25%', left: 0 }}>Tổng số sản phẩm: {products.length}</p>
+                <Link to="/sanpham/themmoisanpham" className="toggle-btn">
                     Thêm sản sản phẩm mới
                 </Link>
                 <button className="toggle-btn" onClick={exportToExcel}>
-                    Xuất file Excel
+                    Xuất file excel
                 </button>
                 <button className="toggle-btn" onClick={toggleAllPrices} style={{ minWidth: '200px' }}>
                     {showAllPrices ? 'Ẩn toàn bộ giá nhập' : 'Hiển thị toàn bộ giá nhập'}
@@ -134,28 +114,38 @@ const Products = () => {
             <table className="products-table">
                 <thead>
                     <tr>
-                        <th>Hình ảnh</th>
                         <th>Mã sản phẩm</th>
+                        <th>Mã vạch</th>
                         <th>Tên sản phẩm</th>
                         <th>Nhóm hàng</th>
                         <th>Giá nhập</th>
                         <th>Giá bán</th>
                         <th>Tồn kho</th>
-                        <th>Hành động</th>
+                        <th></th>
                     </tr>
                 </thead>
                 <tbody>
                     {products.length > 0 ? (
                         products.map((product) => (
                             <tr key={product._id}>
-                                <td>
-                                    <img
-                                        src={`${urlImage}/${product.image}`}
-                                        alt={product.name}
-                                        className="product-image"
-                                    />
+                                <td style={{ maxWidth: '118px' }}>
+                                    <div
+                                        style={{
+                                            display: 'flex',
+                                            alignItems: 'center',
+                                        }}
+                                    >
+                                        <div>
+                                            <img
+                                                src={`${urlImage}/${product.image}`}
+                                                alt={product.name}
+                                                className="product-image"
+                                            />
+                                        </div>
+                                        <div style={{ flex: 1 }}>{product.productCode}</div>
+                                    </div>
                                 </td>
-                                <td>{product.productCode}</td>
+                                <td>{product.barcode}</td>
                                 <td>{product.name}</td>
                                 <td>{convertCategory(product.category)}</td>
                                 {/* <td
@@ -174,15 +164,9 @@ const Products = () => {
                                 </td>
                                 <td className="price-cell">{formatCurrency(product.sellingPrice)}</td>
                                 <td>{product.stock}</td>
-                                <td>
-                                    <button className="edit-btn" onClick={() => handleEdit(product)}>
-                                        Chỉnh sửa
-                                    </button>
-                                    <button className="batch-btn" onClick={() => handleAddBatch(product)}>
-                                        Nhập hàng
-                                    </button>
-                                    <button className="delete-btn" onClick={() => handleDelete(product._id)}>
-                                        Xóa
+                                <td style={{ maxWidth: '100px' }}>
+                                    <button className="detail-btn" onClick={() => handleDetail(product)}>
+                                        Xem chi tiết
                                     </button>
                                 </td>
                             </tr>
