@@ -35,6 +35,7 @@ const ProductPopup = ({ product, onClose }) => {
                 </button>
                 <h2>Chi tiết sản phẩm</h2>
                 <img
+                    draggable={false}
                     src={`${urlImage}${product.image}`}
                     alt={product.name}
                     style={{ width: '250px', height: '250px', objectFit: 'cover', marginBottom: '20px' }}

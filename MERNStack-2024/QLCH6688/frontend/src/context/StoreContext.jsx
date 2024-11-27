@@ -100,7 +100,7 @@ const StoreContextProvider = (props) => {
         return totalQuantity;
     };
 
-    const fetchFoodList = async () => {
+    const fetchProductList = async () => {
         const response = await axios.get(url + 'api/sanpham/danhsachsanpham');
         setProductList(response.data.data);
     };
@@ -118,7 +118,7 @@ const StoreContextProvider = (props) => {
     // get data from local storage
     useEffect(() => {
         async function loadData() {
-            await fetchFoodList();
+            await fetchProductList();
             // if (localStorage.getItem('token')) {
             //     setToken(localStorage.getItem('token'));
             //     await loadCartData(localStorage.getItem('token'));
@@ -219,6 +219,7 @@ const StoreContextProvider = (props) => {
     };
 
     const contextValue = {
+        fetchProductList,
         product_list,
         cartItems,
         setCartItems,

@@ -9,8 +9,9 @@
 }
 
 .detail-product-form {
-    border: 1px solid;
-    /* max-width: 550px; */
+    padding-top: 20px;
+    padding-bottom: 80px;
+    border: 1px solid #ccc;
     display: grid;
     grid-template-columns: 5fr 5fr;
 }

@@ -240,6 +240,7 @@ const Sale = () => {
                                             }}
                                         >
                                             <img
+                                                draggable={false}
                                                 src={`${urlImage}${suggestion.image}`}
                                                 alt={suggestion.name}
                                                 style={{
@@ -336,6 +337,7 @@ const Sale = () => {
                                 <div key={item._id} className="cart-container">
                                     <div className="cart-items-title cart-items-item">
                                         <img
+                                            draggable={false}
                                             onClick={() => handleProductClick(item)}
                                             title="Nhấn để xem chi tiết"
                                             className="img-san-pham"
@@ -361,6 +363,7 @@ const Sale = () => {
                                         {/* START */}
                                         <div className="product-item-counter">
                                             <img
+                                                draggable={false}
                                                 title="Xóa đi một sản phẩm"
                                                 onClick={() => removeFromCart(item._id)}
                                                 src={icons.remove_icon_red}
@@ -391,6 +394,7 @@ const Sale = () => {
                                                 maxLength={3}
                                             />
                                             <img
+                                                draggable={false}
                                                 title="Thêm một sản phẩm"
                                                 onClick={() => addToCart(item._id)}
                                                 src={icons.add_icon_green}

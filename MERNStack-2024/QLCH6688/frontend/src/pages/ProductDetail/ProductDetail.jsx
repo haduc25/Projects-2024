@@ -1,13 +1,12 @@
 import { useState, useEffect, useContext } from 'react';
 import './ProductDetail.css';
 import axios from 'axios';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { StoreContext } from '../../context/StoreContext';
 
 const ProductDetail = () => {
-    const { urlImage, url, product_list, utilityFunctions } = useContext(StoreContext);
-    const { formatCurrency, convertCategory, formatDateFromYYYYMMDDToVietNamDate, removeSpecialChars } =
-        utilityFunctions;
+    const { urlImage, url, utilityFunctions, fetchProductList } = useContext(StoreContext);
+    const { formatCurrency, formatDateFromYYYYMMDDToVietNamDate, removeSpecialChars } = utilityFunctions;
     const { id } = useParams(); // Lấy id từ URL
     const [isEditMode, setIsEditMode] = useState(false);
 
@@ -38,16 +37,19 @@ const ProductDetail = () => {
         quantity: '',
     });
 
+    const [deleteBatchMode, setDeleteBatchMode] = useState(false);
+    const [selectedBatches, setSelectedBatches] = useState([]);
+
     // Lấy thông tin sản phẩm từ server
+    const fetchProduct = async () => {
+        try {
+            const response = await axios.get(`${url}api/sanpham/chitietsanpham/${id}`);
+            setProduct(response.data);
+        } catch (error) {
+            console.error('Lỗi khi lấy sản phẩm:', error);
+        }
+    };
     useEffect(() => {
-        const fetchProduct = async () => {
-            try {
-                const response = await axios.get(`${url}api/sanpham/chitietsanpham/${id}`);
-                setProduct(response.data);
-            } catch (error) {
-                console.error('Lỗi khi lấy sản phẩm:', error);
-            }
-        };
         fetchProduct();
     }, [id]);
 
@@ -73,6 +75,14 @@ const ProductDetail = () => {
             return;
         }
 
+        // Hiển thị cảnh báo xác nhận
+        const confirmSubmit = window.confirm(
+            'Các thay đổi sẽ được lưu và không thể hoàn tác. Bạn có chắc chắn muốn tiếp tục?',
+        );
+        if (!confirmSubmit) {
+            return; // Dừng nếu người dùng không xác nhận
+        }
+
         const formData = new FormData();
         Object.keys(product).forEach((key) => {
             if (key === 'supplier') {
@@ -88,15 +98,11 @@ const ProductDetail = () => {
         });
         if (file) formData.append('image', file); // Nếu có hình ảnh, thêm vào formData
 
-        // Console log dữ liệu trong FormData
-        // formData.forEach((value, key) => {
-        //     console.log(`${key}: ${value}`);
-        // });
-
         try {
             const response = await axios.put(`${url}api/sanpham/capnhatsanpham/${id}`, formData, {
                 headers: { 'Content-Type': 'multipart/form-data' },
             });
+            fetchProductList();
             alert(response.data.message);
             navigate('/sanpham'); // Quay lại trang danh sách sản phẩm
         } catch (error) {
@@ -153,25 +159,14 @@ const ProductDetail = () => {
                     }
                     break;
 
+                case 'sellingPrice':
                 case 'purchasePrice':
                     if (sanitizedValue.length > 10) {
-                        alert('Giá nhập không được dài hơn 10 ký tự.');
+                        alert('Giá không được dài hơn 10 ký tự.');
                         return null;
                     }
                     if (!/^\d*$/.test(sanitizedValue)) {
-                        alert('Giá nhập chỉ được chứa số.');
-                        return null;
-                    }
-                    break;
-
-                case 'sellingPrice':
-                    if (sanitizedValue.length > 10) {
-                        alert('Giá bán không được dài hơn 10 ký tự.');
-                        return null;
-                    }
-                    // Phần này lỗi vẫn chưa ra alert
-                    if (!/^\d*$/.test(sanitizedValue)) {
-                        alert('Giá bán chỉ được chứa số.');
+                        alert('Giá chỉ được chứa số.');
                         return null;
                     }
                     break;
@@ -210,13 +205,48 @@ const ProductDetail = () => {
         }
     };
 
-    const handleBatchChange = (e) => {
+    const handleBatchChange = (e, field) => {
         const { name, value } = e.target;
+        const key = field || name;
+
+        // Validate cho từng trường
+        const validateField = (key, value) => {
+            switch (key) {
+                case 'purchasePrice': {
+                    if (value.length > 10) {
+                        alert('Giá nhập không được dài hơn 10 ký tự.');
+                        return null;
+                    }
+                    if (!/^\d*$/.test(value)) {
+                        alert('Giá mua chỉ được chứa số.');
+                        return null;
+                    }
+                    break;
+                }
+                case 'quantity': {
+                    if (value.length > 5) {
+                        alert('Số lượng không được dài hơn 5 ký tự.');
+                        return null;
+                    }
+                    break;
+                }
+                default:
+                    break;
+            }
+            return value; // Trả về giá trị đã lọc
+        };
+
+        // Validate giá trị
+        const validValue = validateField(key, value);
+        if (validValue === null) return; // Dừng nếu không hợp lệ
+
+        // Cập nhật state với giá trị đã được làm sạch và hợp lệ
         setBatch((prev) => ({
             ...prev,
-            [name]: value,
+            [key]: validValue,
         }));
     };
+
     const addBatch = () => {
         if (!batch.entryDate || !batch.expirationDate || !batch.purchasePrice || !batch.quantity) {
             alert('Vui lòng điền đầy đủ thông tin lô hàng!');
@@ -229,10 +259,38 @@ const ProductDetail = () => {
         setBatch({ entryDate: '', expirationDate: '', purchasePrice: '', quantity: '' });
     };
 
+    const handleDeleteProduct = async (productId) => {
+        // Hiển thị cảnh báo xác nhận
+        const confirmDelete = window.confirm(
+            'Bạn có chắc chắn muốn xóa sản phẩm này? Hành động này không thể hoàn tác!',
+        );
+        if (!confirmDelete) {
+            return; // Dừng nếu người dùng không xác nhận
+        }
+
+        try {
+            // Gửi yêu cầu xoá sản phẩm đến server
+            const response = await axios.post(`${url}api/sanpham/xoasanpham`, { id: productId });
+
+            if (response.data.success) {
+                alert(response.data.message); // Hiển thị thông báo thành công
+                navigate('/sanpham'); // Điều hướng về danh sách sản phẩm
+            } else {
+                alert(`Xóa sản phẩm thất bại: ${response.data.message}`); // Hiển thị lỗi
+            }
+        } catch (error) {
+            console.error('Lỗi khi xóa sản phẩm:', error);
+            alert('Đã xảy ra lỗi khi xóa sản phẩm.');
+        }
+    };
+
     return (
         <div className="detail-product">
             {/* <h1>Chỉnh sửa sản phẩm</h1> */}
             <h1>{isEditMode ? 'Chỉnh sửa' : 'Chi tiết'} sản phẩm</h1>
+            <Link to="/sanpham" className="back-to-product-form-btn">
+                Quay lại
+            </Link>
             <form className="detail-product-form" onSubmit={handleSubmit} encType="multipart/form-data">
                 <div style={{ maxWidth: '600px', paddingLeft: '24px' }}>
                     <div className="form-group">
@@ -327,7 +385,7 @@ const ProductDetail = () => {
                         <input
                             disabled={!isEditMode}
                             required
-                            type="number"
+                            type="text"
                             name="sellingPrice"
                             value={product.sellingPrice}
                             onChange={(e) => handleChange(e, 'sellingPrice')}
@@ -348,14 +406,20 @@ const ProductDetail = () => {
                         <label>Ảnh sản phẩm hiện tại:</label>
                         <br />
                         <img
+                            draggable={false}
                             src={`${urlImage}${product.image}`}
                             alt={`${product.name}`}
-                            style={{ height: '250px', width: '250px', objectFit: 'cover', borderRadius: '5px' }}
+                            style={{
+                                height: '250px',
+                                width: '250px',
+                                objectFit: 'cover',
+                                borderRadius: '5px',
+                                userSelect: 'none',
+                            }}
                         />
                         <br />
-                        <div>
+                        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
                             <label htmlFor="">Thay ảnh mới</label>
-                            <br />
                             <input disabled={!isEditMode} type="file" onChange={(e) => setFile(e.target.files[0])} />
                         </div>
                     </div>
@@ -480,11 +544,11 @@ const ProductDetail = () => {
                                         border: '1px solid #ccc',
                                         minWidth: '270px',
                                     }}
-                                    maxLength={10}
+                                    maxLength={11}
                                     type="text"
                                     name="purchasePrice"
                                     value={batch.purchasePrice}
-                                    onChange={handleBatchChange}
+                                    onChange={(e) => handleBatchChange(e, 'purchasePrice')}
                                     placeholder="Giá nhập (lô hàng)"
                                 />
                             </div>
@@ -501,7 +565,7 @@ const ProductDetail = () => {
                                     type="number"
                                     name="quantity"
                                     value={batch.quantity}
-                                    onChange={handleBatchChange}
+                                    onChange={(e) => handleBatchChange(e, 'quantity')}
                                     placeholder="Số lượng (lô hàng)"
                                 />
                             </div>
@@ -514,25 +578,96 @@ const ProductDetail = () => {
                         >
                             Thêm lô hàng
                         </button>
+
+                        <button
+                            disabled={!isEditMode || product.batches.length === 0}
+                            type="button"
+                            style={{ padding: '8px 4px', marginRight: '16px', marginTop: '8px' }}
+                            onClick={() => {
+                                if (deleteBatchMode) {
+                                    // Khi đang ở chế độ chọn, thực hiện xóa các lô hàng đã chọn
+                                    const confirmDelete = window.confirm(
+                                        'Bạn có chắc chắn muốn xóa các lô hàng đã chọn?',
+                                    );
+                                    if (confirmDelete) {
+                                        setProduct((prev) => ({
+                                            ...prev,
+                                            batches: prev.batches.filter(
+                                                (_, index) => !selectedBatches.includes(index),
+                                            ),
+                                        }));
+                                        setSelectedBatches([]); // Xóa danh sách đã chọn
+                                    }
+                                }
+                                setDeleteBatchMode(!deleteBatchMode); // Chuyển đổi chế độ
+                            }}
+                        >
+                            {deleteBatchMode ? 'Xóa các lô hàng đã chọn' : 'Xóa lô hàng'}
+                        </button>
                     </div>
                     <ul>
                         {product.batches.map((batch, index) => (
-                            <li key={index}>
-                                <b>Số lô {index + 1}:</b> Ngày nhập:{' '}
-                                {formatDateFromYYYYMMDDToVietNamDate(batch.entryDate)}, Ngày hết hạn:{' '}
-                                {formatDateFromYYYYMMDDToVietNamDate(batch.expirationDate)}, Giá nhập:{' '}
-                                {formatCurrency(batch.purchasePrice)}, Số lượng: {batch.quantity}
+                            <li key={index} style={{ marginBottom: '8px' }}>
+                                <b>Số lô {index + 1}:</b>
+                                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                                    <div>
+                                        <p>Ngày nhập: {formatDateFromYYYYMMDDToVietNamDate(batch.entryDate)}</p>
+                                        <p>Giá nhập: {formatCurrency(batch.purchasePrice)}</p>
+                                    </div>
+                                    {deleteBatchMode && (
+                                        <input
+                                            type="checkbox"
+                                            checked={selectedBatches.includes(index)}
+                                            onChange={(e) => {
+                                                if (e.target.checked) {
+                                                    // Thêm vào danh sách đã chọn
+                                                    setSelectedBatches((prev) => [...prev, index]);
+                                                } else {
+                                                    // Loại bỏ khỏi danh sách đã chọn
+                                                    setSelectedBatches((prev) => prev.filter((i) => i !== index));
+                                                }
+                                            }}
+                                        />
+                                    )}
+                                    <div>
+                                        <p>Ngày hết hạn: {formatDateFromYYYYMMDDToVietNamDate(batch.expirationDate)}</p>
+                                        <p>Số lượng: {batch.quantity}</p>
+                                    </div>
+                                </div>
                             </li>
                         ))}
                     </ul>
 
-                    <div style={{ border: '1px solid', minHeight: '200px', marginTop: '14px' }}>
+                    <div
+                        style={{
+                            border: '1px solid #ccc',
+                            borderRadius: '8px',
+                            minHeight: '200px',
+                            marginTop: '14px',
+                            padding: '18px',
+                        }}
+                    >
                         {/* <button type="button">Chỉnh sửa</button> */}
                         {/*  */}
                         <button
                             type="button"
                             style={{ padding: '8px 4px', marginRight: '16px' }}
-                            onClick={() => setIsEditMode(!isEditMode)}
+                            // onClick={() => setIsEditMode(!isEditMode)}
+                            onClick={() => {
+                                if (isEditMode) {
+                                    // case 1: Đang trong chế độ chỉnh sửa
+                                    const confirmExit = window.confirm(
+                                        'Bạn có chắc chắn muốn thoát chế độ chỉnh sửa? Mọi thay đổi sẽ không được lưu.',
+                                    );
+                                    if (confirmExit) {
+                                        fetchProduct();
+                                        setIsEditMode(false); // Thoát chế độ chỉnh sửa
+                                    }
+                                } else {
+                                    // case 2: Chuyển sang chế độ chỉnh sửa
+                                    setIsEditMode(true);
+                                }
+                            }}
                         >
                             {isEditMode ? 'Hủy chỉnh sửa' : 'Chỉnh sửa thông tin'}
                         </button>
@@ -546,6 +681,7 @@ const ProductDetail = () => {
                         <button
                             disabled={!isEditMode}
                             type="button"
+                            onClick={() => handleDeleteProduct(product._id)}
                             style={{ padding: '8px 4px', marginRight: '16px' }}
                         >
                             Xóa sản phẩm

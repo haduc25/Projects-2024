@@ -137,6 +137,7 @@ const Products = () => {
                                     >
                                         <div>
                                             <img
+                                                draggable={false}
                                                 src={`${urlImage}/${product.image}`}
                                                 alt={product.name}
                                                 className="product-image"

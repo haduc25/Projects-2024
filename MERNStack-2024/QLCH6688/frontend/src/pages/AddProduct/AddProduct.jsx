@@ -306,7 +306,7 @@ const AddProduct = () => {
     return (
         <div className="add-product">
             <div>
-                <Link to="/sanpham" className="add-product-form-btn">
+                <Link to="/sanpham" className="back-to-product-form-btn">
                     Quay lại
                 </Link>
             </div>
@@ -319,7 +319,7 @@ const AddProduct = () => {
                             {isEditingCode && (
                                 <button
                                     type="button"
-                                    className="add-product-form-btn"
+                                    className="back-to-product-form-btn"
                                     onClick={() => {
                                         if (
                                             !window.confirm(
@@ -345,7 +345,7 @@ const AddProduct = () => {
                             )}
                             <button
                                 type="button"
-                                className="add-product-form-btn"
+                                className="back-to-product-form-btn"
                                 style={{
                                     textDecoration: 'none',
                                     backgroundColor: isEditingCode ? '#f8d7da' : '#d4edda',
