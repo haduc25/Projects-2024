@@ -176,6 +176,11 @@ const StoreContextProvider = (props) => {
                 nuocngot: 'Nước ngọt',
                 thucphamanlien: 'Thực phẩm ăn liền',
                 caphe: 'Cà phê',
+                mitom: 'Mì tôm',
+                pho: 'Phở',
+                bun: 'Bún',
+                chao: 'Cháo',
+                mien: 'Miến',
             };
 
             return categoryMap[category.toLowerCase()] || category;

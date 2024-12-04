@@ -13,6 +13,7 @@ const Products = () => {
     const [products, setProducts] = useState([]);
     const [visiblePrices, setVisiblePrices] = useState({}); // Quản lý trạng thái hiển thị giá nhập
     const [showAllPrices, setShowAllPrices] = useState(false); // Quản lý trạng thái toggle toàn bộ giá nhập
+    const [sortOrder, setSortOrder] = useState('asc'); // Trạng thái sắp xếp, mặc định là 'asc'
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -45,10 +46,15 @@ const Products = () => {
         }));
     };
 
+    // // Hàm xử lý chỉnh sửa sản phẩm
+    // const handleDetail = (product) => {
+    //     navigate(`/sanpham/chitietsanpham/${product._id}`);
+    // };
+
     // Hàm xử lý chỉnh sửa sản phẩm
     const handleDetail = (product) => {
-        // alert(`Xem chi tiết sản phẩm: ${product.name} ${product.barcode} ${product._id}`);
-        navigate(`/sanpham/chitietsanpham/${product._id}`);
+        const url = `/sanpham/chitietsanpham/${product._id}`;
+        window.open(url, '_blank'); // '_blank' mở trong tab mới
     };
 
     const exportToExcel = () => {
@@ -57,13 +63,11 @@ const Products = () => {
             return;
         }
 
-        // Xác nhận từ người dùng
         const confirmExport = window.confirm(
             'Bạn có chắc chắn muốn tải xuống danh sách sản phẩm dưới dạng file Excel?',
         );
-        if (!confirmExport) return; // Nếu người dùng từ chối, thoát hàm
+        if (!confirmExport) return;
 
-        // Chuyển đổi dữ liệu sản phẩm thành định dạng cho Excel
         const excelData = products.map((product) => ({
             'Mã sản phẩm': product.productCode,
             'Mã vạch': product.barcode,
@@ -74,27 +78,42 @@ const Products = () => {
             'Tồn kho': product.stock,
         }));
 
-        // Tạo worksheet và workbook
         const worksheet = XLSX.utils.json_to_sheet(excelData);
         const workbook = XLSX.utils.book_new();
         XLSX.utils.book_append_sheet(workbook, worksheet, 'Danh sách sản phẩm');
 
-        // Lấy ngày giờ hiện tại
         const now = new Date();
-        const hours = now.getHours().toString().padStart(2, '0'); // Lấy giờ
-        const minutes = now.getMinutes().toString().padStart(2, '0'); // Lấy phút
-        const day = now.getDate().toString().padStart(2, '0'); // Lấy ngày
-        const month = (now.getMonth() + 1).toString().padStart(2, '0'); // Lấy tháng (cộng 1 vì getMonth trả từ 0-11)
-        const year = now.getFullYear(); // Lấy năm
+        const hours = now.getHours().toString().padStart(2, '0');
+        const minutes = now.getMinutes().toString().padStart(2, '0');
+        const day = now.getDate().toString().padStart(2, '0');
+        const month = (now.getMonth() + 1).toString().padStart(2, '0');
+        const year = now.getFullYear();
 
-        // Tạo tên file với định dạng `Danh_sach_san_pham_hhmm_ddmmyyyy.xlsx`
         const fileName = `Danh_sach_san_pham_${hours}${minutes}_${day}${month}${year}.xlsx`;
 
-        // Xuất file Excel
         const excelBuffer = XLSX.write(workbook, { bookType: 'xlsx', type: 'array' });
         const blob = new Blob([excelBuffer], { type: 'application/octet-stream' });
         saveAs(blob, fileName);
     };
+
+    // Hàm sắp xếp danh sách sản phẩm theo productCode
+    const sortProducts = () => {
+        const sortedProducts = [...products].sort((a, b) => {
+            if (sortOrder === 'asc') {
+                return a.productCode.localeCompare(b.productCode); // Tăng dần
+            } else {
+                return b.productCode.localeCompare(a.productCode); // Giảm dần
+            }
+        });
+        return sortedProducts;
+    };
+
+    // Thay đổi thứ tự sắp xếp khi nhấn vào tiêu đề "Mã sản phẩm"
+    const handleSort = () => {
+        setSortOrder((prevState) => (prevState === 'asc' ? 'desc' : 'asc')); // Đổi thứ tự sắp xếp
+    };
+
+    const sortedProducts = sortProducts();
 
     return (
         <div className="products">
@@ -102,7 +121,7 @@ const Products = () => {
             <div className="action-buttons">
                 <p style={{ position: 'absolute', top: '25%', left: 0 }}>Tổng số sản phẩm: {products.length}</p>
                 <Link to="/sanpham/themmoisanpham" className="toggle-btn">
-                    Thêm sản sản phẩm mới
+                    Thêm sản phẩm mới
                 </Link>
                 <button className="toggle-btn" onClick={exportToExcel}>
                     Xuất file excel
@@ -114,7 +133,9 @@ const Products = () => {
             <table className="products-table">
                 <thead>
                     <tr>
-                        <th>Mã sản phẩm</th>
+                        <th onClick={handleSort} style={{ cursor: 'pointer' }}>
+                            Mã sản phẩm {sortOrder === 'asc' ? '▲' : '▼'}
+                        </th>
                         <th>Mã vạch</th>
                         <th>Tên sản phẩm</th>
                         <th>Nhóm hàng</th>
@@ -125,16 +146,11 @@ const Products = () => {
                     </tr>
                 </thead>
                 <tbody>
-                    {products.length > 0 ? (
-                        products.map((product) => (
+                    {sortedProducts.length > 0 ? (
+                        sortedProducts.map((product) => (
                             <tr key={product._id}>
                                 <td style={{ maxWidth: '118px' }}>
-                                    <div
-                                        style={{
-                                            display: 'flex',
-                                            alignItems: 'center',
-                                        }}
-                                    >
+                                    <div style={{ display: 'flex', alignItems: 'center' }}>
                                         <div>
                                             <img
                                                 draggable={false}
@@ -147,15 +163,8 @@ const Products = () => {
                                     </div>
                                 </td>
                                 <td>{product.barcode}</td>
-                                <td>{product.name}</td>
+                                <td style={{ textAlign: 'start', paddingLeft: 20 }}>{product.name}</td>
                                 <td>{convertCategory(product.category)}</td>
-                                {/* <td
-                                    className="price-cell"
-                                    onClick={() => togglePriceVisibility(product._id)}
-                                    title="Click để xem giá"
-                                >
-                                    {visiblePrices[product._id] ? formatCurrency(product.purchasePrice) : '*******'}
-                                </td> */}
                                 <td
                                     className="price-cell"
                                     title="Click để xem giá"

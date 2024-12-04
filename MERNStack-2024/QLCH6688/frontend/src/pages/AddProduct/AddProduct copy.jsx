@@ -306,7 +306,7 @@ const AddProduct = () => {
     return (
         <div className="add-product">
             <div>
-                <Link to="/sanpham" className="add-product-form-btn">
+                <Link to="/sanpham" className="back-to-product-form-btn">
                     Quay lại
                 </Link>
             </div>
@@ -319,7 +319,7 @@ const AddProduct = () => {
                             {isEditingCode && (
                                 <button
                                     type="button"
-                                    className="add-product-form-btn"
+                                    className="back-to-product-form-btn"
                                     onClick={() => {
                                         if (
                                             !window.confirm(
@@ -345,7 +345,7 @@ const AddProduct = () => {
                             )}
                             <button
                                 type="button"
-                                className="add-product-form-btn"
+                                className="back-to-product-form-btn"
                                 style={{
                                     textDecoration: 'none',
                                     backgroundColor: isEditingCode ? '#f8d7da' : '#d4edda',
@@ -390,6 +390,33 @@ const AddProduct = () => {
                         onChange={(e) => handleChange(e, 'name')}
                         required
                     />
+                </div>
+                <div className="form-group">
+                    <label>Nhóm hàng:</label>
+                    <select
+                        name="category"
+                        value={product.category}
+                        onChange={(e) => handleChange(e)}
+                        style={{
+                            padding: '5px',
+                            border: '1px solid #ccc',
+                            borderRadius: '5px',
+                            width: '100%',
+                        }}
+                    >
+                        <option value="">-- Chọn nhóm hàng cho sản phẩm --</option>
+                        <option value="dientu">Điện tử</option>
+                        <option value="thoitrang">Thời trang</option>
+                        <option value="giadung">Gia dụng</option>
+                        <option value="thucpham">Thực phẩm</option>
+                        <option value="mypham">Mỹ phẩm</option>
+                        <option value="thuocla">Thuốc lá</option>
+                        <option value="sua">Sữa</option>
+                        <option value="keocaosu">Kẹo cao su</option>
+                        <option value="nuocngot">Nước ngọt</option>
+                        <option value="thucphamanlien">Thực phẩm ăn liền</option>
+                        <option value="caphe">Cà phê</option>
+                    </select>
                 </div>
                 <div className="form-group">
                     <label>Nhóm hàng:</label>
@@ -540,7 +567,7 @@ const AddProduct = () => {
                 </ul>
                 <div className="form-group">
                     <label>Ảnh sản phẩm:</label>
-                    <input type="file" ref={fileInputRef} onChange={handleImageChange} />
+                    <input type="file" />
                 </div>
 
                 <button type="submit" className="submit-btn">

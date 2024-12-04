@@ -132,8 +132,8 @@ const ProductDetail = () => {
                     break;
                 }
                 case 'name':
-                    if (sanitizedValue.length > 50) {
-                        alert('Tên sản phẩm không được dài hơn 50 ký tự.');
+                    if (sanitizedValue.length > 100) {
+                        alert('Tên sản phẩm không được dài hơn 100 ký tự.');
                         return null;
                     }
                     break;
@@ -345,6 +345,11 @@ const ProductDetail = () => {
                             <option value="nuocngot">Nước ngọt</option>
                             <option value="thucphamanlien">Thực phẩm ăn liền</option>
                             <option value="caphe">Cà phê</option>
+                            <option value="mitom">Mì tôm</option>
+                            <option value="pho">Phở</option>
+                            <option value="bun">Bún</option>
+                            <option value="chao">Cháo</option>
+                            <option value="mien">Miến</option>
                         </select>
                     </div>
                     <div className="form-group">
@@ -674,6 +679,7 @@ const ProductDetail = () => {
                         <button
                             disabled={!isEditMode}
                             type="submit"
+                            // className="submit-btn"
                             style={{ padding: '8px 4px', marginRight: '16px' }}
                         >
                             Lưu & Cập nhật

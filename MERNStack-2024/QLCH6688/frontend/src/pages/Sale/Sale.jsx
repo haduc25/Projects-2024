@@ -62,6 +62,13 @@ const Sale = () => {
         calcAmount();
     }, [cartItems, giamGia, khachThanhToan]);
 
+    useEffect(() => {
+        // Khi số tiền cần trả thay đổi, nếu khách thanh toán hiện tại nhỏ hơn, thì tự động cập nhật
+        if (khachThanhToan < tongTienSauGiamGia) {
+            setKhachThanhToan(tongTienSauGiamGia);
+        }
+    }, [tongTienSauGiamGia]);
+
     const handleSearchChange = (event) => {
         let value = event.target.value;
         // Loại bỏ ký tự đặc biệt
@@ -88,8 +95,8 @@ const Sale = () => {
                     barcode: product.barcode,
                     sellingPrice: product.sellingPrice,
                     image: product.image,
-                }))
-                .slice(0, 5); // Giới hạn 5 gợi ý
+                }));
+            // .slice(0, 5); // Giới hạn 5 gợi ý
             setSuggestions(filteredSuggestions);
         } else {
             setSuggestions([]);
@@ -197,7 +204,7 @@ const Sale = () => {
     return (
         <div className="sale-container">
             {/* DANH SÁCH SẢN PHẨM VÀ GỢI Ý TÌM KIẾM SẢN PHẨM */}
-            <div style={{ backgroundColor: 'lightblue' }}>
+            <div style={{ backgroundColor: 'lightblue', marginLeft: '15px' }}>
                 <form onSubmit={handleSearch} autoComplete="off">
                     <input
                         id="search-input"
@@ -206,6 +213,7 @@ const Sale = () => {
                         value={searchTerm}
                         onChange={handleSearchChange}
                         autoFocus
+                        style={{ paddingLeft: 10, borderRadius: 8, borderWidth: 1, borderColor: '#ccc' }}
                     />
                     <button type="submit" className="sale-btn-tim-kiem">
                         Tìm kiếm
@@ -363,7 +371,6 @@ const Sale = () => {
                                         {/* START */}
                                         <div className="product-item-counter">
                                             <img
-                                                draggable={false}
                                                 title="Xóa đi một sản phẩm"
                                                 onClick={() => removeFromCart(item._id)}
                                                 src={icons.remove_icon_red}
@@ -394,7 +401,6 @@ const Sale = () => {
                                                 maxLength={3}
                                             />
                                             <img
-                                                draggable={false}
                                                 title="Thêm một sản phẩm"
                                                 onClick={() => addToCart(item._id)}
                                                 src={icons.add_icon_green}
