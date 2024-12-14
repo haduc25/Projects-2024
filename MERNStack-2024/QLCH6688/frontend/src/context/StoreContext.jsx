@@ -181,6 +181,8 @@ const StoreContextProvider = (props) => {
                 bun: 'Bún',
                 chao: 'Cháo',
                 mien: 'Miến',
+                giavi: 'Gia vị',
+                nuocmam: 'Nước mắm',
             };
 
             return categoryMap[category.toLowerCase()] || category;

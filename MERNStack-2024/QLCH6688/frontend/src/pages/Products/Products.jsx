@@ -13,7 +13,7 @@ const Products = () => {
     const [products, setProducts] = useState([]);
     const [visiblePrices, setVisiblePrices] = useState({}); // Quản lý trạng thái hiển thị giá nhập
     const [showAllPrices, setShowAllPrices] = useState(false); // Quản lý trạng thái toggle toàn bộ giá nhập
-    const [sortOrder, setSortOrder] = useState('asc'); // Trạng thái sắp xếp, mặc định là 'asc'
+    const [sortOrder, setSortOrder] = useState('desc'); // 'asc', 'desc'
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -163,7 +163,7 @@ const Products = () => {
                                     </div>
                                 </td>
                                 <td>{product.barcode}</td>
-                                <td style={{ textAlign: 'start', paddingLeft: 20 }}>{product.name}</td>
+                                <td style={{ textAlign: 'start', paddingLeft: 20, maxWidth: 400 }}>{product.name}</td>
                                 <td>{convertCategory(product.category)}</td>
                                 <td
                                     className="price-cell"

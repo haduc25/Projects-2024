@@ -3,6 +3,8 @@ import './ProductDetail.css';
 import axios from 'axios';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import { StoreContext } from '../../context/StoreContext';
+import { categories } from '../../assets/categories';
+import { brands, suppliers, units } from '../../assets/brandsAndSuppliers';
 
 const ProductDetail = () => {
     const { urlImage, url, utilityFunctions, fetchProductList } = useContext(StoreContext);
@@ -66,7 +68,15 @@ const ProductDetail = () => {
             alert('Vui lòng chọn nhóm hàng!');
             return;
         }
-        if (!product.supplier.name.trim()) {
+        if (!product.brand) {
+            alert('Vui lòng chọn thương hiệu!');
+            return;
+        }
+        if (!product.unit) {
+            alert('Vui lòng chọn đơn vị tính!');
+            return;
+        }
+        if (!product.supplier.name) {
             alert('Vui lòng nhập tên nhà cung cấp!');
             return;
         }
@@ -115,6 +125,21 @@ const ProductDetail = () => {
         const { name, value } = e.target;
         const key = field || name; // Sử dụng `field` nếu được cung cấp, nếu không thì sử dụng `name`
 
+        // Xử lý riêng trường hợp nhà phân phối
+        if (name === 'supplier.name') {
+            const selectedSupplier = suppliers.find((supp) => supp.value === value);
+
+            setProduct((prev) => ({
+                ...prev,
+                supplier: {
+                    name: value,
+                    contact: selectedSupplier?.phone || '',
+                    address: selectedSupplier?.address || '',
+                },
+            }));
+            return; // Không cần tiếp tục xử lý
+        }
+
         // Validate cho từng trường
         const validateField = (key, sanitizedValue) => {
             switch (key) {
@@ -134,13 +159,6 @@ const ProductDetail = () => {
                 case 'name':
                     if (sanitizedValue.length > 100) {
                         alert('Tên sản phẩm không được dài hơn 100 ký tự.');
-                        return null;
-                    }
-                    break;
-
-                case 'brand':
-                    if (sanitizedValue.length > 30) {
-                        alert('Thương hiệu không được dài hơn 30 ký tự.');
                         return null;
                     }
                     break;
@@ -333,7 +351,7 @@ const ProductDetail = () => {
                                 width: '100%',
                             }}
                         >
-                            <option value="">-- Chọn nhóm hàng cho sản phẩm --</option>
+                            {/* <option value="">-- Chọn nhóm hàng cho sản phẩm --</option>
                             <option value="dientu">Điện tử</option>
                             <option value="thoitrang">Thời trang</option>
                             <option value="giadung">Gia dụng</option>
@@ -349,30 +367,77 @@ const ProductDetail = () => {
                             <option value="pho">Phở</option>
                             <option value="bun">Bún</option>
                             <option value="chao">Cháo</option>
-                            <option value="mien">Miến</option>
+                            <option value="mien">Miến</option> */}
+                            <option value="">-- Chọn nhóm hàng cho sản phẩm --</option>
+                            {categories.map((category) => (
+                                <option key={category.value} value={category.value}>
+                                    {category.label}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     <div className="form-group">
                         <label>Thương hiệu:</label>
-                        <input
+                        {/* <input
                             style={{ textTransform: 'uppercase' }}
                             type="text"
                             name="brand"
                             value={product.brand}
-                            onChange={(e) => handleChange(e, 'brand')}
+                            onChange={handleChange}
                             disabled={!isEditMode}
-                        />
+                        /> */}
+                        <select
+                            disabled={!isEditMode}
+                            required
+                            name="brand"
+                            value={product.brand}
+                            onChange={(e) => handleChange(e)}
+                            style={{
+                                padding: '5px',
+                                border: '1px solid #ccc',
+                                borderRadius: '5px',
+                                width: '100%',
+                            }}
+                        >
+                            <option value="">-- Chọn thương hiệu của sản phẩm --</option>
+                            {brands.map((brand) => (
+                                <option key={brand.value} value={brand.value}>
+                                    {brand.label}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="form-group">
                         <label>*Đơn vị tính:</label>
-                        <input
+                        {/* <input
                             disabled={!isEditMode}
                             type="text"
                             name="unit"
                             value={product.unit}
                             onChange={(e) => handleChange(e, 'unit')}
                             required
-                        />
+                        /> */}
+                        <select
+                            disabled={!isEditMode}
+                            required
+                            name="unit"
+                            value={product.unit}
+                            onChange={handleChange}
+                            style={{
+                                padding: '5px',
+                                border: '1px solid #ccc',
+                                borderRadius: '5px',
+                                width: '100%',
+                                marginBottom: '15px',
+                            }}
+                        >
+                            <option value="">-- Chọn đơn vị tính cho sản phẩm --</option>
+                            {units.map((unit) => (
+                                <option key={unit.value} value={unit.value}>
+                                    {unit.label}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="form-group">
                         <label>*Giá nhập (chung): ({formatCurrency(product.purchasePrice)})</label>
@@ -450,9 +515,9 @@ const ProductDetail = () => {
                             onChange={(e) => handleChange(e, 'notes')}
                         />
                     </div>
-                    <div>
+                    {/* <div>
                         <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
-                            Nhà cung cấp:
+                            Nhà phân phối:
                         </label>
                         <div style={{ display: 'flex', marginBottom: '15px' }}>
                             <input
@@ -493,6 +558,70 @@ const ProductDetail = () => {
                                 placeholder="Địa chỉ"
                                 value={product.supplier.address}
                                 onChange={handleChange}
+                            />
+                        </div>
+                    </div> */}
+
+                    <div>
+                        <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+                            Nhà phân phối:
+                        </label>
+                        <select
+                            disabled={!isEditMode}
+                            required
+                            name="supplier.name"
+                            value={product.supplier.name}
+                            onChange={handleChange}
+                            style={{
+                                padding: '5px',
+                                border: '1px solid #ccc',
+                                borderRadius: '5px',
+                                width: '100%',
+                                marginBottom: '15px',
+                            }}
+                        >
+                            <option value="">-- Chọn nhà phân phối --</option>
+                            {suppliers.map((supp) => (
+                                <option key={supp.value} value={supp.value}>
+                                    {supp.label}
+                                </option>
+                            ))}
+                        </select>
+
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                marginBottom: '15px',
+                            }}
+                        >
+                            <input
+                                style={{
+                                    padding: '8px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #ccc',
+                                    minWidth: '270px',
+                                }}
+                                type="text"
+                                name="supplier.contact"
+                                placeholder="Số điện thoại liên hệ"
+                                value={product.supplier.contact}
+                                onChange={handleChange}
+                                readOnly={product.supplier.name !== 'other'} // Chỉ cho chỉnh sửa nếu chọn "KHÁC"
+                            />
+                            <input
+                                style={{
+                                    padding: '8px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #ccc',
+                                    minWidth: '270px',
+                                }}
+                                type="text"
+                                name="supplier.address"
+                                placeholder="Địa chỉ"
+                                value={product.supplier.address}
+                                onChange={handleChange}
+                                readOnly={product.supplier.name !== 'other'} // Chỉ cho chỉnh sửa nếu chọn "KHÁC"
                             />
                         </div>
                     </div>

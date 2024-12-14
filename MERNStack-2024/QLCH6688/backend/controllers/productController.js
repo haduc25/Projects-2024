@@ -228,6 +228,82 @@ const getDetailProduct = async (req, res) => {
     }
 };
 
+const getDistinctBrands = async (req, res) => {
+    try {
+        // Lấy danh sách các brand không trùng lặp
+        const brands = await productModel.distinct('brand');
+        res.status(200).json(brands);
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi khi lấy danh sách brand', error });
+    }
+};
+
+const getDistinctUnits = async (req, res) => {
+    try {
+        // Lấy danh sách các unit không trùng lặp
+        const units = await productModel.distinct('unit');
+        res.status(200).json(units);
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi khi lấy danh sách unit', error });
+    }
+};
+
+const getDistinctSuppliers = async (req, res) => {
+    try {
+        // Lấy danh sách các supplier.name không trùng lặp
+        const suppliers = await productModel.distinct('supplier.name');
+        res.status(200).json(suppliers);
+    } catch (error) {
+        res.status(500).json({ message: 'Lỗi khi lấy danh sách nhà cung cấp', error });
+    }
+};
+
+const updateAllBrands = async (req, res) => {
+    try {
+        const brandMap = {
+            ACECOOK: 'acecook',
+            acecook: 'acecook',
+            CHINSU: 'chinsu',
+            Chinsu: 'chinsu',
+            'CUNG ĐÌNH FOODS': 'cungdinhfoods',
+            'cung đình foods': 'cungdinhfoods',
+            cungdinhfoods: 'cungdinhfoods',
+            DOUBLEMINT: 'doublemint',
+            'DUNG LOI COFFEE': 'dungloicoffee',
+            KHATOCO: 'khatoco',
+            MACCOFFEE: 'maccoffee',
+            MASAN: 'masan',
+            masan: 'masan',
+            MiCOEM: 'micoem',
+            ONEONE: 'oneone',
+            'State Express': 'stateexpress',
+            VIFON: 'vifon',
+            VINATABA: 'vinataba',
+            vinataba: 'vinataba',
+            'White Horse': 'whitehorse',
+            other: 'other',
+        };
+
+        // Lấy tất cả sản phẩm từ cơ sở dữ liệu
+        const products = await productModel.find({});
+
+        // Duyệt qua từng sản phẩm và cập nhật brand
+        for (const product of products) {
+            const currentBrand = product.brand;
+            const newBrand = brandMap[currentBrand] || 'other'; // Gán 'other' nếu không khớp
+
+            if (currentBrand !== newBrand) {
+                product.brand = newBrand; // Cập nhật brand mới
+                await product.save(); // Lưu sản phẩm
+            }
+        }
+
+        res.status(200).json({ success: true, message: 'Cập nhật thương hiệu thành công' });
+    } catch (error) {
+        res.status(500).json({ success: false, message: 'Lỗi khi cập nhật thương hiệu', error });
+    }
+};
+
 export {
     addProduct,
     updateProduct,
@@ -236,4 +312,8 @@ export {
     addBatchToProduct,
     getLastProductCode,
     getDetailProduct,
+    getDistinctBrands,
+    getDistinctUnits,
+    getDistinctSuppliers,
+    updateAllBrands,
 };

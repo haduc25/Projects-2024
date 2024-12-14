@@ -3,6 +3,8 @@ import './AddProduct.css';
 import axios from 'axios';
 import { useNavigate, Link } from 'react-router-dom';
 import { StoreContext } from '../../context/StoreContext';
+import { categories } from '../../assets/categories';
+import { brands, suppliers, units } from '../../assets/brandsAndSuppliers';
 
 const AddProduct = () => {
     const { urlImage, url, utilityFunctions, fetchProductList } = useContext(StoreContext);
@@ -71,7 +73,15 @@ const AddProduct = () => {
             alert('Vui lòng chọn nhóm hàng!');
             return;
         }
-        if (!product.supplier.name.trim()) {
+        if (!product.brand) {
+            alert('Vui lòng chọn thương hiệu!');
+            return;
+        }
+        if (!product.unit) {
+            alert('Vui lòng chọn đơn vị tính!');
+            return;
+        }
+        if (!product.supplier.name) {
             alert('Vui lòng nhập tên nhà cung cấp!');
             return;
         }
@@ -161,25 +171,132 @@ const AddProduct = () => {
             alert(response.data.message);
             // navigate('/sanpham'); // Quay lại trang danh sách sản phẩm
         } catch (error) {
-            console.error('Lỗi khi cập nhật sản phẩm:', error);
-            alert('Cập nhật sản phẩm thất bại.');
+            console.error('Lỗi khi thêm sản phẩm:', error.response.data.message);
+            alert(error.response.data.message);
         }
     };
+
+    // const handleChange = (e, field) => {
+    //     const { name, value } = e.target;
+    //     const key = field || name; // Sử dụng `field` nếu được cung cấp, nếu không thì sử dụng `name`
+
+    //     // Validate cho từng trường
+    //     const validateField = (key, sanitizedValue) => {
+    //         switch (key) {
+    //             case 'barcode': {
+    //                 // Kiểm tra mã vạch chỉ bao gồm số
+    //                 if (!/^\d*$/.test(sanitizedValue)) {
+    //                     alert('Mã vạch chỉ được chứa số.');
+    //                     return null;
+    //                 }
+    //                 // Kiểm tra độ dài tối đa của mã vạch
+    //                 if (sanitizedValue.length > 13) {
+    //                     alert('Mã vạch không được vượt quá 13 ký tự.');
+    //                     return null;
+    //                 }
+    //                 break;
+    //             }
+    //             case 'name':
+    //                 if (sanitizedValue.length > 100) {
+    //                     alert('Tên sản phẩm không được dài hơn 100 ký tự.');
+    //                     return null;
+    //                 }
+    //                 break;
+
+    //             case 'description':
+    //                 if (sanitizedValue.length > 200) {
+    //                     alert('Mô tả không được dài hơn 200 ký tự.');
+    //                     return null;
+    //                 }
+    //                 break;
+
+    //             case 'notes':
+    //                 if (sanitizedValue.length > 100) {
+    //                     alert('Ghi chú không được dài hơn 100 ký tự.');
+    //                     return null;
+    //                 }
+    //                 break;
+
+    //             case 'sellingPrice':
+    //             case 'purchasePrice':
+    //                 if (sanitizedValue.length > 10) {
+    //                     alert('Giá không được dài hơn 10 ký tự.');
+    //                     return null;
+    //                 }
+    //                 if (!/^\d*$/.test(sanitizedValue)) {
+    //                     alert('Giá chỉ được chứa số.');
+    //                     return null;
+    //                 }
+    //                 break;
+
+    //             case 'stock':
+    //                 if (sanitizedValue.length > 5) {
+    //                     alert('Số lượng tồn không được dài hơn 5 ký tự.');
+    //                     return null;
+    //                 }
+    //                 break;
+
+    //             case 'supplier.name':
+    //                 console.log(123);
+    //                 break;
+    //             default:
+    //                 break;
+    //         }
+    //         return sanitizedValue; // Trả về giá trị đã lọc
+    //     };
+
+    //     // Lọc ký tự đặc biệt
+    //     const sanitizedValue = removeSpecialChars(value, key);
+
+    //     // Validate giá trị
+    //     const validValue = validateField(key, sanitizedValue);
+    //     if (validValue === null) return; // Dừng nếu không hợp lệ
+
+    //     // Cập nhật state với giá trị đã được làm sạch và hợp lệ
+    //     if (key.startsWith('supplier.')) {
+    //         const supplierKey = key.split('.')[1];
+    //         setProduct((prev) => ({
+    //             ...prev,
+    //             supplier: { ...prev.supplier, [supplierKey]: validValue },
+    //         }));
+    //     } else {
+    //         setProduct((prev) => ({
+    //             ...prev,
+    //             [key]: validValue,
+    //         }));
+    //     }
+    // };
 
     const handleChange = (e, field) => {
         const { name, value } = e.target;
         const key = field || name; // Sử dụng `field` nếu được cung cấp, nếu không thì sử dụng `name`
 
-        // Validate cho từng trường
+        // Lọc ký tự đặc biệt
+        const sanitizedValue = removeSpecialChars(value, key);
+
+        // Xử lý riêng trường hợp nhà phân phối
+        if (name === 'supplier.name') {
+            const selectedSupplier = suppliers.find((supp) => supp.value === value);
+
+            setProduct((prev) => ({
+                ...prev,
+                supplier: {
+                    name: value,
+                    contact: selectedSupplier?.phone || '',
+                    address: selectedSupplier?.address || '',
+                },
+            }));
+            return; // Không cần tiếp tục xử lý
+        }
+
+        // Validate cho các trường khác
         const validateField = (key, sanitizedValue) => {
             switch (key) {
                 case 'barcode': {
-                    // Kiểm tra mã vạch chỉ bao gồm số
                     if (!/^\d*$/.test(sanitizedValue)) {
                         alert('Mã vạch chỉ được chứa số.');
                         return null;
                     }
-                    // Kiểm tra độ dài tối đa của mã vạch
                     if (sanitizedValue.length > 13) {
                         alert('Mã vạch không được vượt quá 13 ký tự.');
                         return null;
@@ -192,28 +309,18 @@ const AddProduct = () => {
                         return null;
                     }
                     break;
-
-                case 'brand':
-                    if (sanitizedValue.length > 30) {
-                        alert('Thương hiệu không được dài hơn 30 ký tự.');
-                        return null;
-                    }
-                    break;
-
                 case 'description':
                     if (sanitizedValue.length > 200) {
                         alert('Mô tả không được dài hơn 200 ký tự.');
                         return null;
                     }
                     break;
-
                 case 'notes':
                     if (sanitizedValue.length > 100) {
                         alert('Ghi chú không được dài hơn 100 ký tự.');
                         return null;
                     }
                     break;
-
                 case 'sellingPrice':
                 case 'purchasePrice':
                     if (sanitizedValue.length > 10) {
@@ -225,7 +332,6 @@ const AddProduct = () => {
                         return null;
                     }
                     break;
-
                 case 'stock':
                     if (sanitizedValue.length > 5) {
                         alert('Số lượng tồn không được dài hơn 5 ký tự.');
@@ -235,17 +341,14 @@ const AddProduct = () => {
                 default:
                     break;
             }
-            return sanitizedValue; // Trả về giá trị đã lọc
+            return sanitizedValue;
         };
-
-        // Lọc ký tự đặc biệt
-        const sanitizedValue = removeSpecialChars(value, key);
 
         // Validate giá trị
         const validValue = validateField(key, sanitizedValue);
         if (validValue === null) return; // Dừng nếu không hợp lệ
 
-        // Cập nhật state với giá trị đã được làm sạch và hợp lệ
+        // Cập nhật state
         if (key.startsWith('supplier.')) {
             const supplierKey = key.split('.')[1];
             setProduct((prev) => ({
@@ -365,7 +468,7 @@ const AddProduct = () => {
                                 width: '100%',
                             }}
                         >
-                            <option value="">-- Chọn nhóm hàng cho sản phẩm --</option>
+                            {/* <option value="">-- Chọn nhóm hàng cho sản phẩm --</option>
                             <option value="dientu">Điện tử</option>
                             <option value="thoitrang">Thời trang</option>
                             <option value="giadung">Gia dụng</option>
@@ -381,28 +484,73 @@ const AddProduct = () => {
                             <option value="pho">Phở</option>
                             <option value="bun">Bún</option>
                             <option value="chao">Cháo</option>
-                            <option value="mien">Miến</option>
+                            <option value="mien">Miến</option> */}
+                            <option value="">-- Chọn nhóm hàng cho sản phẩm --</option>
+                            {categories.map((category) => (
+                                <option key={category.value} value={category.value}>
+                                    {category.label}
+                                </option>
+                            ))}
                         </select>
                     </div>
                     <div className="form-group">
                         <label>Thương hiệu:</label>
-                        <input
+                        {/* <input
                             style={{ textTransform: 'uppercase' }}
                             type="text"
                             name="brand"
                             value={product.brand}
                             onChange={(e) => handleChange(e, 'brand')}
-                        />
+                        /> */}
+                        <select
+                            required
+                            name="brand"
+                            value={product.brand}
+                            onChange={(e) => handleChange(e)}
+                            style={{
+                                padding: '5px',
+                                border: '1px solid #ccc',
+                                borderRadius: '5px',
+                                width: '100%',
+                            }}
+                        >
+                            <option value="">-- Chọn thương hiệu của sản phẩm --</option>
+                            {brands.map((brand) => (
+                                <option key={brand.value} value={brand.value}>
+                                    {brand.label}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="form-group">
                         <label>*Đơn vị tính:</label>
-                        <input
+                        {/* <input
                             type="text"
                             name="unit"
                             value={product.unit}
                             onChange={(e) => handleChange(e, 'unit')}
                             required
-                        />
+                        /> */}
+                        <select
+                            required
+                            name="unit"
+                            value={product.unit}
+                            onChange={handleChange}
+                            style={{
+                                padding: '5px',
+                                border: '1px solid #ccc',
+                                borderRadius: '5px',
+                                width: '100%',
+                                marginBottom: '15px',
+                            }}
+                        >
+                            <option value="">-- Chọn đơn vị tính cho sản phẩm --</option>
+                            {units.map((unit) => (
+                                <option key={unit.value} value={unit.value}>
+                                    {unit.label}
+                                </option>
+                            ))}
+                        </select>
                     </div>
                     <div className="form-group">
                         <label>*Giá nhập (chung): ({formatCurrency(product.purchasePrice)})</label>
@@ -461,20 +609,29 @@ const AddProduct = () => {
                             onChange={(e) => handleChange(e, 'notes')}
                         />
                     </div>
-                    <div>
+                    {/* <div>
                         <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
-                            Nhà cung cấp:
+                            Nhà phân phối:
                         </label>
-                        <div style={{ display: 'flex', marginBottom: '15px' }}>
-                            <input
-                                required
-                                style={{ flex: 1, padding: '8px', borderRadius: '4px', border: '1px solid #ccc' }}
-                                type="text"
-                                name="supplier.name"
-                                value={product.supplier.name}
-                                onChange={handleChange}
-                            />
-                        </div>
+                        <select
+                            required
+                            name="supplier.name"
+                            value={product.supplier.name}
+                            onChange={(e) => handleChange(e)}
+                            style={{
+                                padding: '5px',
+                                border: '1px solid #ccc',
+                                borderRadius: '5px',
+                                width: '100%',
+                            }}
+                        >
+                            <option value="">-- Chọn nhà phân phối --</option>
+                            {suppliers.map((supp) => (
+                                <option key={supp.value} value={supp.value}>
+                                    {supp.label}
+                                </option>
+                            ))}
+                        </select>
                         <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '15px' }}>
                             <input
                                 style={{
@@ -501,6 +658,69 @@ const AddProduct = () => {
                                 placeholder="Địa chỉ"
                                 value={product.supplier.address}
                                 onChange={handleChange}
+                            />
+                        </div>
+                    </div> */}
+
+                    <div>
+                        <label style={{ display: 'block', fontWeight: 'bold', marginBottom: '5px' }}>
+                            Nhà phân phối:
+                        </label>
+                        <select
+                            required
+                            name="supplier.name"
+                            value={product.supplier.name}
+                            onChange={handleChange}
+                            style={{
+                                padding: '5px',
+                                border: '1px solid #ccc',
+                                borderRadius: '5px',
+                                width: '100%',
+                                marginBottom: '15px',
+                            }}
+                        >
+                            <option value="">-- Chọn nhà phân phối --</option>
+                            {suppliers.map((supp) => (
+                                <option key={supp.value} value={supp.value}>
+                                    {supp.label}
+                                </option>
+                            ))}
+                        </select>
+
+                        <div
+                            style={{
+                                display: 'flex',
+                                justifyContent: 'space-between',
+                                marginBottom: '15px',
+                            }}
+                        >
+                            <input
+                                style={{
+                                    padding: '8px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #ccc',
+                                    minWidth: '270px',
+                                }}
+                                type="text"
+                                name="supplier.contact"
+                                placeholder="Số điện thoại liên hệ"
+                                value={product.supplier.contact}
+                                onChange={handleChange}
+                                readOnly={product.supplier.name !== 'other'} // Chỉ cho chỉnh sửa nếu chọn "KHÁC"
+                            />
+                            <input
+                                style={{
+                                    padding: '8px',
+                                    borderRadius: '4px',
+                                    border: '1px solid #ccc',
+                                    minWidth: '270px',
+                                }}
+                                type="text"
+                                name="supplier.address"
+                                placeholder="Địa chỉ"
+                                value={product.supplier.address}
+                                onChange={handleChange}
+                                readOnly={product.supplier.name !== 'other'} // Chỉ cho chỉnh sửa nếu chọn "KHÁC"
                             />
                         </div>
                     </div>

@@ -7,6 +7,10 @@ import {
     addBatchToProduct,
     getLastProductCode,
     getDetailProduct,
+    getDistinctBrands,
+    getDistinctUnits,
+    updateAllBrands,
+    getDistinctSuppliers,
 } from '../controllers/productController.js';
 import multer from 'multer';
 
@@ -42,5 +46,13 @@ productRouter.get('/chitietsanpham/:id', getDetailProduct);
 
 // Route nhập hàng (cập nhật lô hàng cho sản phẩm)
 productRouter.get('/laymasanphamcuoicung', getLastProductCode);
+
+productRouter.get('/laytatcabrand', getDistinctBrands);
+
+productRouter.get('/laytatcaunit', getDistinctUnits);
+
+productRouter.get('/laytatcanpp', getDistinctSuppliers);
+
+productRouter.get('/formatallbrand', updateAllBrands);
 
 export default productRouter;
