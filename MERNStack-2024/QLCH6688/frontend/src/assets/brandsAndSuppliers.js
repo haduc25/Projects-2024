@@ -22,6 +22,18 @@ export const brands = [
     { value: 'hoanggialochoangthinh', label: 'HOÀNG GIA LỘC - HOÀNG THỊNH' },
     { value: 'balangfoods', label: 'BA LÀNG FOODS' },
     { value: 'ofood', label: 'OFOOD' },
+    { value: 'trangan168', label: 'TMC TRÀNG AN 168' },
+    { value: 'barona', label: 'BARONA' },
+    { value: 'conamo', label: 'CONAMO' },
+    { value: 'knorr', label: 'KNORR' },
+    { value: 'vissanmaivang', label: 'VISSAN - MAI VÀNG' },
+    { value: 'halongcanfoco', label: 'HALONG CANFOCO' },
+    { value: 'tuongan', label: 'TƯỜNG AN' },
+    { value: 'freda', label: 'FREDA' },
+    { value: 'meizan', label: 'MEIZAN' },
+    { value: 'umi', label: 'UMI' },
+    { value: 'tiara', label: 'TIARA' },
+    { value: 'utama', label: 'UTAMA' },
     { value: 'other', label: 'KHÁC' },
 ];
 
@@ -33,6 +45,7 @@ export const units = [
     { value: 'lo', label: 'Lọ' },
     { value: 'hopbat', label: 'Hộp, Bát' },
     { value: 'hoply', label: 'Hộp, Ly' },
+    { value: 'hop', label: 'Hộp' },
     { value: 'other', label: 'Khác' },
 ];
 

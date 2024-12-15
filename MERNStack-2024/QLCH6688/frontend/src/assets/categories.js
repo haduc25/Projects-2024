@@ -17,4 +17,6 @@ export const categories = [
     { value: 'mien', label: 'Miến' },
     { value: 'giavi', label: 'Gia vị' },
     { value: 'nuocmam', label: 'Nước mắm' },
+    { value: 'thucphamdonghop', label: 'Thực phẩm đóng hộp' },
+    { value: 'dauan', label: 'Dầu ăn' },
 ];

@@ -183,6 +183,8 @@ const StoreContextProvider = (props) => {
                 mien: 'Miến',
                 giavi: 'Gia vị',
                 nuocmam: 'Nước mắm',
+                thucphamdonghop: 'Thực phẩm đóng hộp',
+                dauan: 'Dầu ăn',
             };
 
             return categoryMap[category.toLowerCase()] || category;
