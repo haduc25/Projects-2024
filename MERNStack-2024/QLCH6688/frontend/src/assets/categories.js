@@ -18,5 +18,9 @@ export const categories = [
     { value: 'giavi', label: 'Gia vị' },
     { value: 'nuocmam', label: 'Nước mắm' },
     { value: 'thucphamdonghop', label: 'Thực phẩm đóng hộp' },
+    { value: 'dodungnhabep', label: 'Đồ dùng nhà bếp' },
     { value: 'dauan', label: 'Dầu ăn' },
+    { value: 'nguyenlieu', label: 'Nguyên liệu' },
+    { value: 'banhkeo', label: 'Bánh, kẹo' },
+    { value: 'thach', label: 'Thạch' },
 ];

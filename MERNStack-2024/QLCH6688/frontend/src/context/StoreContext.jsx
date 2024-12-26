@@ -185,6 +185,10 @@ const StoreContextProvider = (props) => {
                 nuocmam: 'Nước mắm',
                 thucphamdonghop: 'Thực phẩm đóng hộp',
                 dauan: 'Dầu ăn',
+                dodungnhabep: 'Đồ dùng nhà bếp',
+                nguyenlieu: 'Nguyên liệu',
+                banhkeo: 'Bánh, kẹo',
+                thach: 'Thạch',
             };
 
             return categoryMap[category.toLowerCase()] || category;
